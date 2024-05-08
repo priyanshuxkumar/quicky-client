@@ -1,4 +1,5 @@
-import Image from "next/image";
+'use client'
+
 import ChatCard from "@/components/ChatCard/index"
 import { useMemo } from "react";
 
@@ -6,6 +7,8 @@ import { CircleUserRound , Bolt } from 'lucide-react';
 import Link from "next/link";
 
 import {Avatar, AvatarImage } from "@/components/ui/avatar";
+import { useCurrentUser } from "../../hooks/user";
+import { Chat, User } from "../../gql/graphql";
 
 interface QuickySidebarButton {
   title: string;
@@ -15,17 +18,20 @@ interface QuickySidebarButton {
 
 export default function Home() {
 
+  const {user} = useCurrentUser();
+  // console.log("user" , user)
+
   const sidebarMenuItems:QuickySidebarButton[]= useMemo(()=>
     [ 
       {
         title: "Profile",
         icon: <CircleUserRound />,
-        link: "/"
+        link: "/profile"
       },
       {
         title: "Setting",
         icon: <Bolt />,
-        link: "/"
+        link: "/setting"
       },
     ],[])
 
@@ -45,15 +51,9 @@ export default function Home() {
       </div>
       <div className="col-span-4 border-x-[0.2px] px-4 h-screen border-x-gray-600 overflow-y-scroll no-scrollbar"> 
           <h1 className="font-semibold text-2xl my-4">Chats</h1>
-          <ChatCard/>
-          <ChatCard/>
-          <ChatCard/>
-          <ChatCard/>
-          <ChatCard/>
-          <ChatCard/>
-          <ChatCard/>
-          <ChatCard/>
-          <ChatCard/>
+          {
+            user && user?.chats?.map((chat: Chat)=> chat ? <ChatCard key={chat?.id} data={chat?.users}/> : null)
+          }
       </div>
 
       <div className="col-span-7 bg-gray-100">
