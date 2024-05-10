@@ -4,20 +4,14 @@ export const getCurrentUserQuery = graphql(`
     #graphql
     query GetCurrentUser {
         getCurrentUser {
+            id
             username
             firstname
             lastname
             email
-            avatar  
-            chats {
-                id
-                users {
-                    id
-                    avatar
-                    firstname
-                    lastname
-                }
-            }
+            avatar 
         }
     }
 `)
+
+

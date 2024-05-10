@@ -1,7 +1,8 @@
-export const getSenderInfo = (loggedUser:any, users:any) => {
-    if (!loggedUser || !users || users.length < 2) {
+export const getOtherUserInfoOnChat = (loggedUser:any, users:any) => {
+    if (!loggedUser || !Array.isArray(users) || users.length !== 2) {
         return null;
     }
+    const otherUserInfo = users.find(chatUser => chatUser.user.id !== loggedUser);
 
-    return users[0]._id === loggedUser._id ? users[1] : users[0];
+    return otherUserInfo ? otherUserInfo.user : null;
 };

@@ -3,9 +3,9 @@ import { Inter} from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
+import { Toaster } from 'react-hot-toast';
 
 import { Providers } from "../../QueryClientProvider";
-
 
 export const metadata: Metadata = {
   title: "Quicky | Connect yourself",
@@ -20,7 +20,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <Providers>
-        <body className={inter.className}>{children}</body>
+        <body className={inter.className}>{children}
+          <Toaster/>
+        </body>
       </Providers>
     </html>
   );

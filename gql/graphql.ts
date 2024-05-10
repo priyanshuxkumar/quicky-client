@@ -25,31 +25,40 @@ export type AuthPayload = {
 export type Chat = {
   __typename?: 'Chat';
   id: Scalars['ID']['output'];
-  users?: Maybe<Array<Maybe<User>>>;
+  messages?: Maybe<Array<Maybe<Message>>>;
+  users?: Maybe<Array<Maybe<ChatUser>>>;
 };
 
 export type ChatCreateInput = {
   recieverId: Scalars['String']['input'];
 };
 
+export type ChatUser = {
+  __typename?: 'ChatUser';
+  chat?: Maybe<Chat>;
+  id: Scalars['ID']['output'];
+  user?: Maybe<User>;
+};
+
 export type CreateMessageInput = {
   chatId: Scalars['String']['input'];
   content: Scalars['String']['input'];
-  recipientId: Scalars['String']['input'];
+  recipientId?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type Message = {
   __typename?: 'Message';
+  chat?: Maybe<Chat>;
   chatId: Scalars['String']['output'];
   content: Scalars['String']['output'];
   id: Scalars['ID']['output'];
-  recipientId: Scalars['String']['output'];
+  recipientId?: Maybe<Scalars['String']['output']>;
   senderId: Scalars['String']['output'];
 };
 
 export type Mutation = {
   __typename?: 'Mutation';
-  createChat: Chat;
+  createChat?: Maybe<Chat>;
   createMessage: Message;
   loginUser: AuthPayload;
   registerUser: User;
@@ -77,24 +86,25 @@ export type MutationRegisterUserArgs = {
 
 export type Query = {
   __typename?: 'Query';
-  fetchAllMessages: Array<Maybe<Message>>;
+  fetchAllChats: Array<Chat>;
+  fetchAllMessages: Array<Message>;
   getCurrentUser?: Maybe<User>;
 };
 
 
 export type QueryFetchAllMessagesArgs = {
-  chatId: Scalars['String']['input'];
+  chatId: Scalars['ID']['input'];
 };
 
 export type User = {
   __typename?: 'User';
   avatar?: Maybe<Scalars['String']['output']>;
-  chats?: Maybe<Array<Maybe<Chat>>>;
   email: Scalars['String']['output'];
   firstname: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   lastname?: Maybe<Scalars['String']['output']>;
   username: Scalars['String']['output'];
+  users?: Maybe<Array<Maybe<ChatUser>>>;
 };
 
 export type UserCreateInput = {
@@ -125,12 +135,26 @@ export type RegisterUserMutationVariables = Exact<{
 
 export type RegisterUserMutation = { __typename?: 'Mutation', registerUser: { __typename?: 'User', username: string, firstname: string, lastname?: string | null } };
 
+export type FetchChatMessagesQueryVariables = Exact<{
+  chatId: Scalars['ID']['input'];
+}>;
+
+
+export type FetchChatMessagesQuery = { __typename?: 'Query', fetchAllMessages: Array<{ __typename?: 'Message', id: string, content: string, senderId: string, recipientId?: string | null }> };
+
+export type FetchAllChatsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type FetchAllChatsQuery = { __typename?: 'Query', fetchAllChats: Array<{ __typename?: 'Chat', id: string, users?: Array<{ __typename?: 'ChatUser', user?: { __typename?: 'User', id: string, avatar?: string | null, firstname: string, lastname?: string | null, username: string } | null } | null> | null, messages?: Array<{ __typename?: 'Message', content: string } | null> | null }> };
+
 export type GetCurrentUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetCurrentUserQuery = { __typename?: 'Query', getCurrentUser?: { __typename?: 'User', username: string, firstname: string, lastname?: string | null, email: string, avatar?: string | null, chats?: Array<{ __typename?: 'Chat', id: string, users?: Array<{ __typename?: 'User', id: string, avatar?: string | null, firstname: string, lastname?: string | null } | null> | null } | null> | null } | null };
+export type GetCurrentUserQuery = { __typename?: 'Query', getCurrentUser?: { __typename?: 'User', id: string, username: string, firstname: string, lastname?: string | null, email: string, avatar?: string | null } | null };
 
 
 export const LoginUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"LoginUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"payload"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UserLoginInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"loginUser"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"payload"},"value":{"kind":"Variable","name":{"kind":"Name","value":"payload"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"firstname"}},{"kind":"Field","name":{"kind":"Name","value":"lastname"}}]}},{"kind":"Field","name":{"kind":"Name","value":"token"}}]}}]}}]} as unknown as DocumentNode<LoginUserMutation, LoginUserMutationVariables>;
 export const RegisterUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RegisterUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"payload"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UserCreateInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"registerUser"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"payload"},"value":{"kind":"Variable","name":{"kind":"Name","value":"payload"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"username"}},{"kind":"Field","name":{"kind":"Name","value":"firstname"}},{"kind":"Field","name":{"kind":"Name","value":"lastname"}}]}}]}}]} as unknown as DocumentNode<RegisterUserMutation, RegisterUserMutationVariables>;
-export const GetCurrentUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetCurrentUser"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getCurrentUser"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"username"}},{"kind":"Field","name":{"kind":"Name","value":"firstname"}},{"kind":"Field","name":{"kind":"Name","value":"lastname"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"avatar"}},{"kind":"Field","name":{"kind":"Name","value":"chats"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"users"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"avatar"}},{"kind":"Field","name":{"kind":"Name","value":"firstname"}},{"kind":"Field","name":{"kind":"Name","value":"lastname"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetCurrentUserQuery, GetCurrentUserQueryVariables>;
+export const FetchChatMessagesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"FetchChatMessages"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"chatId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fetchAllMessages"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"chatId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"chatId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"content"}},{"kind":"Field","name":{"kind":"Name","value":"senderId"}},{"kind":"Field","name":{"kind":"Name","value":"recipientId"}}]}}]}}]} as unknown as DocumentNode<FetchChatMessagesQuery, FetchChatMessagesQueryVariables>;
+export const FetchAllChatsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"FetchAllChats"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fetchAllChats"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"users"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"avatar"}},{"kind":"Field","name":{"kind":"Name","value":"firstname"}},{"kind":"Field","name":{"kind":"Name","value":"lastname"}},{"kind":"Field","name":{"kind":"Name","value":"username"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"messages"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"content"}}]}}]}}]}}]} as unknown as DocumentNode<FetchAllChatsQuery, FetchAllChatsQueryVariables>;
+export const GetCurrentUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetCurrentUser"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getCurrentUser"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"username"}},{"kind":"Field","name":{"kind":"Name","value":"firstname"}},{"kind":"Field","name":{"kind":"Name","value":"lastname"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"avatar"}}]}}]}}]} as unknown as DocumentNode<GetCurrentUserQuery, GetCurrentUserQueryVariables>;

@@ -4,6 +4,7 @@ import React, { useCallback, useState } from 'react'
 import { useLoginUser } from '../../../hooks/user'
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 const Page = () => {
   const {mutate} = useLoginUser()

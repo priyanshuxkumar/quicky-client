@@ -3,8 +3,10 @@ import { UserCreateInput, UserLoginInput } from "../gql/graphql";
 import { loginUserMutation, registerUserMutation } from "../graphql/mutation/user"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { getCurrentUserQuery } from "../graphql/query/user";
+import { fetchAllChatsQuery } from "../graphql/query/chat";
 
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 
 
@@ -27,6 +29,7 @@ export const useRegisterUser = () => {
 };
 
 export const useLoginUser = () => {
+    const router = useRouter()
     const queryClient = useQueryClient();
   
     const mutation = useMutation({
@@ -35,8 +38,10 @@ export const useLoginUser = () => {
         console.log('Login data response:', response?.loginUser?.token);
 
         const userData = response.loginUser.user
+
         if(userData){
             localStorage.setItem('__token__', response?.loginUser?.token);
+            router.replace('/')
         }
         return response;
       },
@@ -47,7 +52,7 @@ export const useLoginUser = () => {
       },
       onError: (error) => {
         console.error('Login error:', error);
-        toast.error('Login failed!', { id: '1' });
+        toast.error('Invalid Credentials', { id: '1' });
       },
     });
   
@@ -60,4 +65,13 @@ export const useCurrentUser =  () => {
         queryFn: () => graphqlClient.request(getCurrentUserQuery),
     })
     return { ...query, user: query.data?.getCurrentUser};
-} 
+};
+
+export const useFetchAllChats = () => {
+  const query = useQuery({
+      queryKey: ["all-chats"],
+
+      queryFn: () => graphqlClient.request(fetchAllChatsQuery),
+  })
+  return { ...query, chats: query.data?.fetchAllChats};
+}

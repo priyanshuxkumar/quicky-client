@@ -15,7 +15,9 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
 const documents = {
     "\n  #graphql\n  mutation LoginUser($payload: UserLoginInput!) {\n    loginUser(payload: $payload) {\n      user {\n        firstname\n        lastname\n      }\n      token\n    }\n}\n": types.LoginUserDocument,
     "\n    #graphql\n    mutation RegisterUser($payload: UserCreateInput!){\n      registerUser(payload: $payload) {\n        username\n        firstname\n        lastname\n      }\n    }\n": types.RegisterUserDocument,
-    "\n    #graphql\n    query GetCurrentUser {\n        getCurrentUser {\n            username\n            firstname\n            lastname\n            email\n            avatar  \n            chats {\n                id\n                users {\n                    id\n                    avatar\n                    firstname\n                    lastname\n                }\n            }\n        }\n    }\n": types.GetCurrentUserDocument,
+    "\n  #graphql\n  query FetchChatMessages($chatId: ID!) {\n    fetchAllMessages(chatId: $chatId) {\n      id\n      content\n      senderId\n      recipientId\n    }\n  }\n": types.FetchChatMessagesDocument,
+    "\n  #graphql\n  query FetchAllChats {\n    fetchAllChats {\n      id\n      users {\n        user {\n          id\n          avatar\n          firstname\n          lastname\n          username\n        }\n      }\n      messages {\n            content\n      }\n    }\n  }\n": types.FetchAllChatsDocument,
+    "\n    #graphql\n    query GetCurrentUser {\n        getCurrentUser {\n            id\n            username\n            firstname\n            lastname\n            email\n            avatar \n        }\n    }\n": types.GetCurrentUserDocument,
 };
 
 /**
@@ -43,7 +45,15 @@ export function graphql(source: "\n    #graphql\n    mutation RegisterUser($payl
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n    #graphql\n    query GetCurrentUser {\n        getCurrentUser {\n            username\n            firstname\n            lastname\n            email\n            avatar  \n            chats {\n                id\n                users {\n                    id\n                    avatar\n                    firstname\n                    lastname\n                }\n            }\n        }\n    }\n"): (typeof documents)["\n    #graphql\n    query GetCurrentUser {\n        getCurrentUser {\n            username\n            firstname\n            lastname\n            email\n            avatar  \n            chats {\n                id\n                users {\n                    id\n                    avatar\n                    firstname\n                    lastname\n                }\n            }\n        }\n    }\n"];
+export function graphql(source: "\n  #graphql\n  query FetchChatMessages($chatId: ID!) {\n    fetchAllMessages(chatId: $chatId) {\n      id\n      content\n      senderId\n      recipientId\n    }\n  }\n"): (typeof documents)["\n  #graphql\n  query FetchChatMessages($chatId: ID!) {\n    fetchAllMessages(chatId: $chatId) {\n      id\n      content\n      senderId\n      recipientId\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  #graphql\n  query FetchAllChats {\n    fetchAllChats {\n      id\n      users {\n        user {\n          id\n          avatar\n          firstname\n          lastname\n          username\n        }\n      }\n      messages {\n            content\n      }\n    }\n  }\n"): (typeof documents)["\n  #graphql\n  query FetchAllChats {\n    fetchAllChats {\n      id\n      users {\n        user {\n          id\n          avatar\n          firstname\n          lastname\n          username\n        }\n      }\n      messages {\n            content\n      }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    #graphql\n    query GetCurrentUser {\n        getCurrentUser {\n            id\n            username\n            firstname\n            lastname\n            email\n            avatar \n        }\n    }\n"): (typeof documents)["\n    #graphql\n    query GetCurrentUser {\n        getCurrentUser {\n            id\n            username\n            firstname\n            lastname\n            email\n            avatar \n        }\n    }\n"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};
