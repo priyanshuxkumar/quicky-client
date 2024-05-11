@@ -1,25 +1,33 @@
 "use client";
 
-import { Chat } from "../../../gql/graphql";
+import { Message } from "../../../gql/graphql";
+import { useCurrentUser } from "../../../hooks/user";
+
+import {messageSendTime} from "@/config/TimeServices"
 
 interface MessageCardProps {
-  data: Chat;
-  // onClick: (chatId: string) => void;
+  data: Message;
 }
 
-const MessageCard = () => {
+const MessageCard : React.FC<MessageCardProps> = ({data})=> {
+  const {user} = useCurrentUser()
+ 
+  //Message send time 
+  const createdAt = new Date(Number(data?.createdAt.toString())); 
+  const formattedTime = messageSendTime(createdAt)
+
   return (
     <>
-      <div className="bg-gray-200 w-[450px] my-2 px-4 py-2 rounded-2xl">
-        <p className="text-sm">
-          Lorem, ipsum dolor sit amet consectetur adipisicing elit. Assumenda,
-          at. Enim assumenda natus necessitatibus? Amet laboriosam ullam
-          voluptatum voluptatem nemo.
-        </p>
-      </div>
-      <div className="px-3">
-        <span className="text-xs">10:20</span>
-      </div>
+      <div className={`flex flex-col justify-end mb-6 ${data.senderId == user?.id && 'place-items-end'}`}>
+        <div className={`${data.senderId == user?.id ? 'bg-slate-500 text-white': 'bg-slate-200' } w-fit my-2 px-4 py-3 rounded-full`}>
+          <p className="text-sm">
+            {data?.content}
+          </p>
+        </div>
+        <div className="px-2 w-fit bg-white rounded-lg mx-2">
+          <span className="text-xs text-black">{formattedTime}</span>
+        </div>
+      </div>  
     </>
   );
 };

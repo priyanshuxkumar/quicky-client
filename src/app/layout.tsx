@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
-import { Inter} from "next/font/google";
+import { Inter , Noto_Sans} from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
+const noto_sans = Noto_Sans({ subsets: ["latin"] });
+
 import { Toaster } from 'react-hot-toast';
 
 import { Providers } from "../../QueryClientProvider";
+import { ChatIdProvider } from "@/context/ChatIdContext";
 
 export const metadata: Metadata = {
   title: "Quicky | Connect yourself",
@@ -19,11 +22,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <Providers>
-        <body className={inter.className}>{children}
-          <Toaster/>
-        </body>
-      </Providers>
+        <Providers>
+          <ChatIdProvider>
+            <body className={noto_sans.className}>{children}
+              <Toaster/>
+            </body>
+          </ChatIdProvider>
+        </Providers>
     </html>
   );
 }

@@ -8,6 +8,7 @@ export const fetchChatMessagesQuery = graphql(`
       content
       senderId
       recipientId
+      createdAt
     }
   }
 `);
@@ -28,6 +29,7 @@ export const fetchAllChatsQuery = graphql(`
       }
       messages {
             content
+            createdAt
       }
     }
   }

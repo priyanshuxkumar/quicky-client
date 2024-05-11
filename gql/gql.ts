@@ -13,10 +13,11 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Therefore it is highly recommended to use the babel or swc plugin for production.
  */
 const documents = {
+    "\n    #graphql\n    mutation CreateMessage($payload: CreateMessageInput!){\n        createMessage(payload: $payload){\n            senderId\n            content\n            chatId\n        }\n    }\n": types.CreateMessageDocument,
     "\n  #graphql\n  mutation LoginUser($payload: UserLoginInput!) {\n    loginUser(payload: $payload) {\n      user {\n        firstname\n        lastname\n      }\n      token\n    }\n}\n": types.LoginUserDocument,
     "\n    #graphql\n    mutation RegisterUser($payload: UserCreateInput!){\n      registerUser(payload: $payload) {\n        username\n        firstname\n        lastname\n      }\n    }\n": types.RegisterUserDocument,
-    "\n  #graphql\n  query FetchChatMessages($chatId: ID!) {\n    fetchAllMessages(chatId: $chatId) {\n      id\n      content\n      senderId\n      recipientId\n    }\n  }\n": types.FetchChatMessagesDocument,
-    "\n  #graphql\n  query FetchAllChats {\n    fetchAllChats {\n      id\n      users {\n        user {\n          id\n          avatar\n          firstname\n          lastname\n          username\n        }\n      }\n      messages {\n            content\n      }\n    }\n  }\n": types.FetchAllChatsDocument,
+    "\n  #graphql\n  query FetchChatMessages($chatId: ID!) {\n    fetchAllMessages(chatId: $chatId) {\n      id\n      content\n      senderId\n      recipientId\n      createdAt\n    }\n  }\n": types.FetchChatMessagesDocument,
+    "\n  #graphql\n  query FetchAllChats {\n    fetchAllChats {\n      id\n      users {\n        user {\n          id\n          avatar\n          firstname\n          lastname\n          username\n        }\n      }\n      messages {\n            content\n            createdAt\n      }\n    }\n  }\n": types.FetchAllChatsDocument,
     "\n    #graphql\n    query GetCurrentUser {\n        getCurrentUser {\n            id\n            username\n            firstname\n            lastname\n            email\n            avatar \n        }\n    }\n": types.GetCurrentUserDocument,
 };
 
@@ -37,6 +38,10 @@ export function graphql(source: string): unknown;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n    #graphql\n    mutation CreateMessage($payload: CreateMessageInput!){\n        createMessage(payload: $payload){\n            senderId\n            content\n            chatId\n        }\n    }\n"): (typeof documents)["\n    #graphql\n    mutation CreateMessage($payload: CreateMessageInput!){\n        createMessage(payload: $payload){\n            senderId\n            content\n            chatId\n        }\n    }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n  #graphql\n  mutation LoginUser($payload: UserLoginInput!) {\n    loginUser(payload: $payload) {\n      user {\n        firstname\n        lastname\n      }\n      token\n    }\n}\n"): (typeof documents)["\n  #graphql\n  mutation LoginUser($payload: UserLoginInput!) {\n    loginUser(payload: $payload) {\n      user {\n        firstname\n        lastname\n      }\n      token\n    }\n}\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -45,11 +50,11 @@ export function graphql(source: "\n    #graphql\n    mutation RegisterUser($payl
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  #graphql\n  query FetchChatMessages($chatId: ID!) {\n    fetchAllMessages(chatId: $chatId) {\n      id\n      content\n      senderId\n      recipientId\n    }\n  }\n"): (typeof documents)["\n  #graphql\n  query FetchChatMessages($chatId: ID!) {\n    fetchAllMessages(chatId: $chatId) {\n      id\n      content\n      senderId\n      recipientId\n    }\n  }\n"];
+export function graphql(source: "\n  #graphql\n  query FetchChatMessages($chatId: ID!) {\n    fetchAllMessages(chatId: $chatId) {\n      id\n      content\n      senderId\n      recipientId\n      createdAt\n    }\n  }\n"): (typeof documents)["\n  #graphql\n  query FetchChatMessages($chatId: ID!) {\n    fetchAllMessages(chatId: $chatId) {\n      id\n      content\n      senderId\n      recipientId\n      createdAt\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  #graphql\n  query FetchAllChats {\n    fetchAllChats {\n      id\n      users {\n        user {\n          id\n          avatar\n          firstname\n          lastname\n          username\n        }\n      }\n      messages {\n            content\n      }\n    }\n  }\n"): (typeof documents)["\n  #graphql\n  query FetchAllChats {\n    fetchAllChats {\n      id\n      users {\n        user {\n          id\n          avatar\n          firstname\n          lastname\n          username\n        }\n      }\n      messages {\n            content\n      }\n    }\n  }\n"];
+export function graphql(source: "\n  #graphql\n  query FetchAllChats {\n    fetchAllChats {\n      id\n      users {\n        user {\n          id\n          avatar\n          firstname\n          lastname\n          username\n        }\n      }\n      messages {\n            content\n            createdAt\n      }\n    }\n  }\n"): (typeof documents)["\n  #graphql\n  query FetchAllChats {\n    fetchAllChats {\n      id\n      users {\n        user {\n          id\n          avatar\n          firstname\n          lastname\n          username\n        }\n      }\n      messages {\n            content\n            createdAt\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
