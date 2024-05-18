@@ -23,3 +23,25 @@ export const registerUserMutation = graphql(`
       }
     }
 `)
+
+export const sendOTPVerificationEmailMutation = graphql(`
+    #graphql
+    mutation SendOTPVerificationEmail($email: String!){
+      sendOTPVerificationEmail(email: $email) {
+        success
+        message
+      }
+    }
+`)
+export const verifyOTPMutation = graphql(`
+    #graphql
+    mutation VerifyOTP($email: String!, $otp:String!){
+      verifyOTP(email: $email , otp: $otp) {
+        success
+        message
+      }
+    }
+`)
+
+
+

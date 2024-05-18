@@ -1,16 +1,21 @@
 'use client'
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { User } from '../../gql/graphql';
 
-interface ChatIdContextType {
+interface ChatContextType {
     selectedChatId: string | null;
+    isChatBoxOpen: boolean;
     setSelectedChatId: (chatId: string) => void;
+    setIsChatBoxOpen: (isOpen: boolean) => void;
+    recipientUser: User | null;
+    setRecipientUser: (User: User) => void;
 }
 
-const ChatIdContext = createContext<ChatIdContextType | null>(null);
+const ChatContext = createContext<ChatContextType | null>(null);
 
-export const useChatIdContext = (): ChatIdContextType => {
-    const context = useContext(ChatIdContext);
+export const useChatContext = (): ChatContextType => {
+    const context = useContext(ChatContext);
     if (!context) {
         throw new Error('useChatIdContext must be used within a ChatIdProvider');
     }
@@ -23,10 +28,12 @@ interface ChatIdProviderProps {
 
 export const ChatIdProvider: React.FC<ChatIdProviderProps> = ({ children }) => {
     const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+    const [isChatBoxOpen, setIsChatBoxOpen] = useState<boolean>(false);
+    const [recipientUser, setRecipientUser] = useState<User | null>(null);
 
     return (
-        <ChatIdContext.Provider value={{ selectedChatId, setSelectedChatId }}>
+        <ChatContext.Provider value={{ selectedChatId, setSelectedChatId , isChatBoxOpen, setIsChatBoxOpen , recipientUser , setRecipientUser}}>
             {children}
-        </ChatIdContext.Provider>
+        </ChatContext.Provider>
     );
 };

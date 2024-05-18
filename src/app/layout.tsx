@@ -10,6 +10,8 @@ import { Toaster } from 'react-hot-toast';
 import { Providers } from "../../QueryClientProvider";
 import { ChatIdProvider } from "@/context/ChatIdContext";
 
+import {ThemeProvider as NextThemesProvider} from "next-themes";
+
 export const metadata: Metadata = {
   title: "Quicky | Connect yourself",
   description: "A text messaging app",
@@ -21,13 +23,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" >
         <Providers>
-          <ChatIdProvider>
-            <body className={noto_sans.className}>{children}
-              <Toaster/>
-            </body>
-          </ChatIdProvider>
+            <NextThemesProvider attribute="class" defaultTheme="light">
+                <ChatIdProvider>
+                    <body className={noto_sans.className}>{children}
+                        <Toaster/>
+                    </body>
+                </ChatIdProvider>
+              </NextThemesProvider>
         </Providers>
     </html>
   );

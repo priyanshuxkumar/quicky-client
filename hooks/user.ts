@@ -1,5 +1,5 @@
 import { graphqlClient } from "../clients/api"
-import { CreateMessageInput, UserCreateInput, UserLoginInput } from "../gql/graphql";
+import { SendMessageInput, UserCreateInput, UserLoginInput } from "../gql/graphql";
 import { loginUserMutation, registerUserMutation } from "../graphql/mutation/user"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { getCurrentUserQuery } from "../graphql/query/user";
@@ -7,7 +7,7 @@ import { fetchAllChatsQuery, fetchChatMessagesQuery } from "../graphql/query/cha
 
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { createMessageMutation } from "../graphql/mutation/chat";
+import { sendMessageMutation } from "../graphql/mutation/chat";
 
 
 
@@ -23,8 +23,12 @@ export const useRegisterUser = () => {
 
         onSuccess: async(payload) => {
             await queryClient.invalidateQueries({ queryKey: ["register"] }),
-            toast.success('Login succesfull', {id: '2'})
+            toast.success('Signup successfull', {id: '2'})
         },
+        onError: (error) => {
+          console.error('Error in Register User:', error);
+          toast.error("Invalid credentials", {id: '2'})
+        }
     });
     return mutation;
 };
@@ -36,13 +40,11 @@ export const useLoginUser = () => {
     const mutation = useMutation({
       mutationFn: async (payload: UserLoginInput) => {
         const response = await graphqlClient.request(loginUserMutation, { payload });
-        console.log('Login data response:', response?.loginUser?.token);
-
         const userData = response.loginUser.user
 
         if(userData){
             localStorage.setItem('__token__', response?.loginUser?.token);
-            router.replace('/')
+            router.replace('/chats')
         }
         return response;
       },
@@ -77,11 +79,19 @@ export const useFetchAllChats = () => {
   return { ...query, chats: query.data?.fetchAllChats};
 }
 
-export const useFetchChatMessages = (chatId:string) => {
+export const useFetchChatMessages = (chatId?: string) => {
   // Use useQuery to manage fetching the chat messages
   const query = useQuery({
       queryKey: ['chat-messages', chatId], // Unique query key for caching
-      queryFn: () => graphqlClient.request(fetchChatMessagesQuery, { chatId }), // GraphQL request function
+      queryFn: () => {
+        if (chatId) {
+          // Fetch chat messages only if chatId is provided
+          return graphqlClient.request(fetchChatMessagesQuery, { chatId });
+        } else {
+          // Return empty array if chatId is not provided
+          return { fetchAllMessages: [] };
+        }
+      },
       enabled: !!chatId, // Enable query only if chatId is provided
   });
 
@@ -91,18 +101,18 @@ export const useFetchChatMessages = (chatId:string) => {
   };
 };
 
-export const useCreateMessage = () => {
+export const useSendMessage = () => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-      mutationFn : async (payload : CreateMessageInput) => {
-        const response = await graphqlClient.request(createMessageMutation, {payload})
+      mutationFn : async (payload : SendMessageInput) => {
+        const response = await graphqlClient.request(sendMessageMutation, {payload})
         console.log(response)
         return response;
       },
-      onMutate: (payload) => toast.loading('Creating message', { id: '1' }),
+      onMutate: (payload) => toast.loading('Sending message', { id: '1' }),
       onSuccess: async () => {
-        await queryClient.invalidateQueries({ queryKey: ['create-message'] });
+        await queryClient.invalidateQueries({ queryKey: ['send-message'] });
         toast.success('Message sent successfully!', { id: '1' });
 
       },
@@ -113,3 +123,4 @@ export const useCreateMessage = () => {
   })
   return mutation;
 }
+

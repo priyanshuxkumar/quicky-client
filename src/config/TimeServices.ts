@@ -1,7 +1,31 @@
+import { format, isToday, isYesterday } from 'date-fns'; // Import the necessary functions
+
+
 function messageSendTime(createdAt: Date): string {
     const hours = String(createdAt.getHours()).padStart(2, '0');
     const minutes = String(createdAt.getMinutes()).padStart(2, '0');
     return `${hours}:${minutes}`;
+}
+
+
+
+function messagesTimeGroup(createdAt: Date): string {
+    // Get current date
+    const currentDate = new Date();
+    
+    // Check if the message was sent today
+    if (isToday(createdAt)) {
+        // If the message was sent today, return the time in hours and minutes
+        const hours = String(createdAt.getHours()).padStart(2, '0');
+        const minutes = String(createdAt.getMinutes()).padStart(2, '0');
+        return `${hours}:${minutes}`;
+    } else if (isYesterday(createdAt)) {
+        // If the message was sent yesterday, return 'Yesterday'
+        return 'Yesterday';
+    } else {
+        // Otherwise, return the date in 'MMM dd' format (e.g., Jan 01)
+        return format(createdAt, 'MMM dd');
+    }
 }
 
 
@@ -26,5 +50,5 @@ function getTimeAgoString(createdAt: Date) : string{
     }
   }
 
-export {messageSendTime ,  getTimeAgoString} ;
+export {messageSendTime ,  getTimeAgoString , messagesTimeGroup} ;
 

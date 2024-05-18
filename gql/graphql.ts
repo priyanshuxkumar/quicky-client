@@ -29,21 +29,11 @@ export type Chat = {
   users?: Maybe<Array<Maybe<ChatUser>>>;
 };
 
-export type ChatCreateInput = {
-  recieverId: Scalars['String']['input'];
-};
-
 export type ChatUser = {
   __typename?: 'ChatUser';
   chat?: Maybe<Chat>;
   id: Scalars['ID']['output'];
   user?: Maybe<User>;
-};
-
-export type CreateMessageInput = {
-  chatId: Scalars['String']['input'];
-  content: Scalars['String']['input'];
-  recipientId?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type Message = {
@@ -59,20 +49,11 @@ export type Message = {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  createChat?: Maybe<Chat>;
-  createMessage: Message;
   loginUser: AuthPayload;
   registerUser: User;
-};
-
-
-export type MutationCreateChatArgs = {
-  payload: ChatCreateInput;
-};
-
-
-export type MutationCreateMessageArgs = {
-  payload: CreateMessageInput;
+  sendMessage?: Maybe<Message>;
+  sendOTPVerificationEmail: VerificationEmailResponse;
+  verifyOTP: VerificationEmailResponse;
 };
 
 
@@ -85,16 +66,56 @@ export type MutationRegisterUserArgs = {
   payload: UserCreateInput;
 };
 
+
+export type MutationSendMessageArgs = {
+  payload: SendMessageInput;
+};
+
+
+export type MutationSendOtpVerificationEmailArgs = {
+  email: Scalars['String']['input'];
+};
+
+
+export type MutationVerifyOtpArgs = {
+  email: Scalars['String']['input'];
+  otp: Scalars['String']['input'];
+};
+
 export type Query = {
   __typename?: 'Query';
+  checkEmailIsValid?: Maybe<Scalars['Boolean']['output']>;
+  checkUsernameIsValid?: Maybe<Scalars['Boolean']['output']>;
   fetchAllChats: Array<Chat>;
   fetchAllMessages: Array<Message>;
   getCurrentUser?: Maybe<User>;
+  getUserByUsername: Array<User>;
+};
+
+
+export type QueryCheckEmailIsValidArgs = {
+  email: Scalars['String']['input'];
+};
+
+
+export type QueryCheckUsernameIsValidArgs = {
+  username: Scalars['String']['input'];
 };
 
 
 export type QueryFetchAllMessagesArgs = {
   chatId: Scalars['ID']['input'];
+};
+
+
+export type QueryGetUserByUsernameArgs = {
+  username: Scalars['String']['input'];
+};
+
+export type SendMessageInput = {
+  chatId?: InputMaybe<Scalars['String']['input']>;
+  content: Scalars['String']['input'];
+  recipientId: Scalars['String']['input'];
 };
 
 export type User = {
@@ -103,6 +124,7 @@ export type User = {
   email: Scalars['String']['output'];
   firstname: Scalars['String']['output'];
   id: Scalars['ID']['output'];
+  isActive?: Maybe<Scalars['Boolean']['output']>;
   lastname?: Maybe<Scalars['String']['output']>;
   username: Scalars['String']['output'];
   users?: Maybe<Array<Maybe<ChatUser>>>;
@@ -122,12 +144,18 @@ export type UserLoginInput = {
   password: Scalars['String']['input'];
 };
 
-export type CreateMessageMutationVariables = Exact<{
-  payload: CreateMessageInput;
+export type VerificationEmailResponse = {
+  __typename?: 'verificationEmailResponse';
+  message: Scalars['String']['output'];
+  success: Scalars['Boolean']['output'];
+};
+
+export type SendMessageMutationVariables = Exact<{
+  payload: SendMessageInput;
 }>;
 
 
-export type CreateMessageMutation = { __typename?: 'Mutation', createMessage: { __typename?: 'Message', senderId: string, content: string, chatId: string } };
+export type SendMessageMutation = { __typename?: 'Mutation', sendMessage?: { __typename?: 'Message', senderId: string, content: string, chatId: string } | null };
 
 export type LoginUserMutationVariables = Exact<{
   payload: UserLoginInput;
@@ -143,6 +171,21 @@ export type RegisterUserMutationVariables = Exact<{
 
 export type RegisterUserMutation = { __typename?: 'Mutation', registerUser: { __typename?: 'User', username: string, firstname: string, lastname?: string | null } };
 
+export type SendOtpVerificationEmailMutationVariables = Exact<{
+  email: Scalars['String']['input'];
+}>;
+
+
+export type SendOtpVerificationEmailMutation = { __typename?: 'Mutation', sendOTPVerificationEmail: { __typename?: 'verificationEmailResponse', success: boolean, message: string } };
+
+export type VerifyOtpMutationVariables = Exact<{
+  email: Scalars['String']['input'];
+  otp: Scalars['String']['input'];
+}>;
+
+
+export type VerifyOtpMutation = { __typename?: 'Mutation', verifyOTP: { __typename?: 'verificationEmailResponse', success: boolean, message: string } };
+
 export type FetchChatMessagesQueryVariables = Exact<{
   chatId: Scalars['ID']['input'];
 }>;
@@ -153,17 +196,43 @@ export type FetchChatMessagesQuery = { __typename?: 'Query', fetchAllMessages: A
 export type FetchAllChatsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type FetchAllChatsQuery = { __typename?: 'Query', fetchAllChats: Array<{ __typename?: 'Chat', id: string, users?: Array<{ __typename?: 'ChatUser', user?: { __typename?: 'User', id: string, avatar?: string | null, firstname: string, lastname?: string | null, username: string } | null } | null> | null, messages?: Array<{ __typename?: 'Message', content: string, createdAt: string } | null> | null }> };
+export type FetchAllChatsQuery = { __typename?: 'Query', fetchAllChats: Array<{ __typename?: 'Chat', id: string, users?: Array<{ __typename?: 'ChatUser', user?: { __typename?: 'User', id: string, avatar?: string | null, firstname: string, lastname?: string | null, username: string, isActive?: boolean | null } | null } | null> | null, messages?: Array<{ __typename?: 'Message', content: string, createdAt: string } | null> | null }> };
 
 export type GetCurrentUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetCurrentUserQuery = { __typename?: 'Query', getCurrentUser?: { __typename?: 'User', id: string, username: string, firstname: string, lastname?: string | null, email: string, avatar?: string | null } | null };
 
+export type CheckUsernameIsValidQueryVariables = Exact<{
+  username: Scalars['String']['input'];
+}>;
 
-export const CreateMessageDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateMessage"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"payload"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateMessageInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createMessage"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"payload"},"value":{"kind":"Variable","name":{"kind":"Name","value":"payload"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"senderId"}},{"kind":"Field","name":{"kind":"Name","value":"content"}},{"kind":"Field","name":{"kind":"Name","value":"chatId"}}]}}]}}]} as unknown as DocumentNode<CreateMessageMutation, CreateMessageMutationVariables>;
+
+export type CheckUsernameIsValidQuery = { __typename?: 'Query', checkUsernameIsValid?: boolean | null };
+
+export type CheckEmailIsValidQueryVariables = Exact<{
+  email: Scalars['String']['input'];
+}>;
+
+
+export type CheckEmailIsValidQuery = { __typename?: 'Query', checkEmailIsValid?: boolean | null };
+
+export type GetUserByUsernameQueryVariables = Exact<{
+  username: Scalars['String']['input'];
+}>;
+
+
+export type GetUserByUsernameQuery = { __typename?: 'Query', getUserByUsername: Array<{ __typename?: 'User', id: string, firstname: string, lastname?: string | null, username: string, avatar?: string | null, isActive?: boolean | null, users?: Array<{ __typename?: 'ChatUser', chat?: { __typename?: 'Chat', id: string } | null } | null> | null }> };
+
+
+export const SendMessageDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"SendMessage"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"payload"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"SendMessageInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"sendMessage"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"payload"},"value":{"kind":"Variable","name":{"kind":"Name","value":"payload"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"senderId"}},{"kind":"Field","name":{"kind":"Name","value":"content"}},{"kind":"Field","name":{"kind":"Name","value":"chatId"}}]}}]}}]} as unknown as DocumentNode<SendMessageMutation, SendMessageMutationVariables>;
 export const LoginUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"LoginUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"payload"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UserLoginInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"loginUser"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"payload"},"value":{"kind":"Variable","name":{"kind":"Name","value":"payload"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"firstname"}},{"kind":"Field","name":{"kind":"Name","value":"lastname"}}]}},{"kind":"Field","name":{"kind":"Name","value":"token"}}]}}]}}]} as unknown as DocumentNode<LoginUserMutation, LoginUserMutationVariables>;
 export const RegisterUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RegisterUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"payload"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UserCreateInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"registerUser"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"payload"},"value":{"kind":"Variable","name":{"kind":"Name","value":"payload"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"username"}},{"kind":"Field","name":{"kind":"Name","value":"firstname"}},{"kind":"Field","name":{"kind":"Name","value":"lastname"}}]}}]}}]} as unknown as DocumentNode<RegisterUserMutation, RegisterUserMutationVariables>;
+export const SendOtpVerificationEmailDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"SendOTPVerificationEmail"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"email"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"sendOTPVerificationEmail"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"email"},"value":{"kind":"Variable","name":{"kind":"Name","value":"email"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]} as unknown as DocumentNode<SendOtpVerificationEmailMutation, SendOtpVerificationEmailMutationVariables>;
+export const VerifyOtpDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"VerifyOTP"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"email"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"otp"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"verifyOTP"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"email"},"value":{"kind":"Variable","name":{"kind":"Name","value":"email"}}},{"kind":"Argument","name":{"kind":"Name","value":"otp"},"value":{"kind":"Variable","name":{"kind":"Name","value":"otp"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]} as unknown as DocumentNode<VerifyOtpMutation, VerifyOtpMutationVariables>;
 export const FetchChatMessagesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"FetchChatMessages"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"chatId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fetchAllMessages"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"chatId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"chatId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"content"}},{"kind":"Field","name":{"kind":"Name","value":"senderId"}},{"kind":"Field","name":{"kind":"Name","value":"recipientId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]} as unknown as DocumentNode<FetchChatMessagesQuery, FetchChatMessagesQueryVariables>;
-export const FetchAllChatsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"FetchAllChats"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fetchAllChats"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"users"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"avatar"}},{"kind":"Field","name":{"kind":"Name","value":"firstname"}},{"kind":"Field","name":{"kind":"Name","value":"lastname"}},{"kind":"Field","name":{"kind":"Name","value":"username"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"messages"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"content"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]}}]} as unknown as DocumentNode<FetchAllChatsQuery, FetchAllChatsQueryVariables>;
+export const FetchAllChatsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"FetchAllChats"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fetchAllChats"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"users"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"avatar"}},{"kind":"Field","name":{"kind":"Name","value":"firstname"}},{"kind":"Field","name":{"kind":"Name","value":"lastname"}},{"kind":"Field","name":{"kind":"Name","value":"username"}},{"kind":"Field","name":{"kind":"Name","value":"isActive"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"messages"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"content"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]}}]} as unknown as DocumentNode<FetchAllChatsQuery, FetchAllChatsQueryVariables>;
 export const GetCurrentUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetCurrentUser"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getCurrentUser"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"username"}},{"kind":"Field","name":{"kind":"Name","value":"firstname"}},{"kind":"Field","name":{"kind":"Name","value":"lastname"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"avatar"}}]}}]}}]} as unknown as DocumentNode<GetCurrentUserQuery, GetCurrentUserQueryVariables>;
+export const CheckUsernameIsValidDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"CheckUsernameIsValid"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"username"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"checkUsernameIsValid"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"username"},"value":{"kind":"Variable","name":{"kind":"Name","value":"username"}}}]}]}}]} as unknown as DocumentNode<CheckUsernameIsValidQuery, CheckUsernameIsValidQueryVariables>;
+export const CheckEmailIsValidDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"CheckEmailIsValid"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"email"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"checkEmailIsValid"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"email"},"value":{"kind":"Variable","name":{"kind":"Name","value":"email"}}}]}]}}]} as unknown as DocumentNode<CheckEmailIsValidQuery, CheckEmailIsValidQueryVariables>;
+export const GetUserByUsernameDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetUserByUsername"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"username"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getUserByUsername"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"username"},"value":{"kind":"Variable","name":{"kind":"Name","value":"username"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"firstname"}},{"kind":"Field","name":{"kind":"Name","value":"lastname"}},{"kind":"Field","name":{"kind":"Name","value":"username"}},{"kind":"Field","name":{"kind":"Name","value":"avatar"}},{"kind":"Field","name":{"kind":"Name","value":"isActive"}},{"kind":"Field","name":{"kind":"Name","value":"users"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"chat"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetUserByUsernameQuery, GetUserByUsernameQueryVariables>;

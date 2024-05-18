@@ -1,9 +1,9 @@
 import { graphql } from "../../gql";
 
-export const createMessageMutation = graphql(`
+export const sendMessageMutation = graphql(`
     #graphql
-    mutation CreateMessage($payload: CreateMessageInput!){
-        createMessage(payload: $payload){
+    mutation SendMessage($payload: SendMessageInput!){
+        sendMessage(payload: $payload){
             senderId
             content
             chatId

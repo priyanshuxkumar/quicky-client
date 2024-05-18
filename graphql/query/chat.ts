@@ -25,6 +25,7 @@ export const fetchAllChatsQuery = graphql(`
           firstname
           lastname
           username
+          isActive
         }
       }
       messages {
