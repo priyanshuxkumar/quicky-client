@@ -20,14 +20,15 @@ const Page = () => {
     const router = useRouter();
     const { user, isLoading } = useCurrentUser();
   
-    useEffect(()=> {
+    //Checking if the user is already logged in or not
+    useEffect(() => {
       const isUserLogin = () => {
-        if (!isLoading && user) {
-          router.push('/');
+        if (window.localStorage.getItem("__token__")) {
+          router.push("/chats");
         }
-      }
-      isUserLogin()
-    },[isLoading , user , router])
+      };
+      isUserLogin();
+    }, [router]);
 
 
   const { mutate } = useRegisterUser();

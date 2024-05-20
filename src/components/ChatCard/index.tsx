@@ -24,10 +24,11 @@ const ChatCard : React.FC<ChatCardProps> = ({ data , onClick}) => {
   const secondUserInfoOnChat = getOtherUserInfoOnChat(user?.id , data.users)
 
 
-  const handleClick = () => {
+  const handleClick = (e) => {
+    e.preventDefault()
     onClick(data.id);
-    setRecipientUser(secondUserInfoOnChat)    
-    router.replace(`/chats/u/${secondUserInfoOnChat.username}`, { scroll: false })
+    setRecipientUser(secondUserInfoOnChat)      
+    // router.push(`/chats/u/${secondUserInfoOnChat.username}` , {scroll:false})
   };
 
   //Getting time of last message

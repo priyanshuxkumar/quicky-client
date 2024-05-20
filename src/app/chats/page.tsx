@@ -3,15 +3,16 @@
 import ChatCard from "@/components/ChatCard/index";
 import { QuickyLayout } from "@/components/Layout/QuickyLayout";
 import { useChatContext } from "@/context/ChatIdContext";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Image from "next/image";
-import ChatCardSkeleton from "@/components/ChatCardSkeleton";
 import { useRouter } from "next/navigation";
 import { getUserByUsernameQuery } from "../../../graphql/query/user";
 import { User, Chat } from "../../../gql/graphql";
 import { useCurrentUser, useFetchAllChats } from "../../../hooks/user";
 import { graphqlClient } from "../../../clients/api";
-import MessagesRenderPage from "./u/[username]/page";
+import {LoaderCircle} from "lucide-react"
+
+
 
 export default function Chats() {
   const router = useRouter();
@@ -19,8 +20,8 @@ export default function Chats() {
 
   useEffect(() => {
     const isUserLogin = () => {
-      if (!isLoading && !user) {
-        router.push("/login");
+      if (!window.localStorage.getItem("__token__")) {
+        router.push("/");
       }
     };
     isUserLogin();
@@ -62,7 +63,6 @@ export default function Chats() {
     <>
     <div>
       <QuickyLayout>
-        {/* <div className=""> */}
           <div className={`w-full my-2 `}>
             {" "}
             <div className={`flex w-full items-center px-1 py-3 `}>
@@ -142,11 +142,14 @@ export default function Chats() {
                   />
                 ))
               ) : (
-                <ChatCardSkeleton />
+                <Suspense fallback={null}>
+                  <div className="flex justify-center items-center h-full">
+                    <LoaderCircle size={36} className="animate-spin"/>
+                  </div>
+                </Suspense>
               )}
             </div>
           )}
-        {/* </div> */}
       </QuickyLayout>
     </div>
     </>

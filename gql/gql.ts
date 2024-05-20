@@ -13,7 +13,7 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Therefore it is highly recommended to use the babel or swc plugin for production.
  */
 const documents = {
-    "\n    #graphql\n    mutation SendMessage($payload: SendMessageInput!){\n        sendMessage(payload: $payload){\n            senderId\n            content\n            chatId\n        }\n    }\n": types.SendMessageDocument,
+    "\n    #graphql\n    mutation SendMessage($payload: SendMessageInput!){\n        sendMessage(payload: $payload){\n            id\n            senderId\n            content\n            chatId\n            recipientId\n            createdAt\n        }\n    }\n": types.SendMessageDocument,
     "\n  #graphql\n  mutation LoginUser($payload: UserLoginInput!) {\n    loginUser(payload: $payload) {\n      user {\n        firstname\n        lastname\n      }\n      token\n    }\n}\n": types.LoginUserDocument,
     "\n    #graphql\n    mutation RegisterUser($payload: UserCreateInput!){\n      registerUser(payload: $payload) {\n        username\n        firstname\n        lastname\n      }\n    }\n": types.RegisterUserDocument,
     "\n    #graphql\n    mutation SendOTPVerificationEmail($email: String!){\n      sendOTPVerificationEmail(email: $email) {\n        success\n        message\n      }\n    }\n": types.SendOtpVerificationEmailDocument,
@@ -43,7 +43,7 @@ export function graphql(source: string): unknown;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n    #graphql\n    mutation SendMessage($payload: SendMessageInput!){\n        sendMessage(payload: $payload){\n            senderId\n            content\n            chatId\n        }\n    }\n"): (typeof documents)["\n    #graphql\n    mutation SendMessage($payload: SendMessageInput!){\n        sendMessage(payload: $payload){\n            senderId\n            content\n            chatId\n        }\n    }\n"];
+export function graphql(source: "\n    #graphql\n    mutation SendMessage($payload: SendMessageInput!){\n        sendMessage(payload: $payload){\n            id\n            senderId\n            content\n            chatId\n            recipientId\n            createdAt\n        }\n    }\n"): (typeof documents)["\n    #graphql\n    mutation SendMessage($payload: SendMessageInput!){\n        sendMessage(payload: $payload){\n            id\n            senderId\n            content\n            chatId\n            recipientId\n            createdAt\n        }\n    }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

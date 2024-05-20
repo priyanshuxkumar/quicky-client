@@ -8,6 +8,8 @@ import { fetchAllChatsQuery, fetchChatMessagesQuery } from "../graphql/query/cha
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { sendMessageMutation } from "../graphql/mutation/chat";
+import { useChatContext } from "@/context/ChatIdContext";
+import socket from "@/lib/socket";
 
 
 
@@ -79,8 +81,15 @@ export const useFetchAllChats = () => {
   return { ...query, chats: query.data?.fetchAllChats};
 }
 
+
+
 export const useFetchChatMessages = (chatId?: string) => {
+
+  const { selectedChatId }: any = useChatContext();
+
   // Use useQuery to manage fetching the chat messages
+  socket.emit("join chat", selectedChatId);
+
   const query = useQuery({
       queryKey: ['chat-messages', chatId], // Unique query key for caching
       queryFn: () => {
@@ -103,11 +112,11 @@ export const useFetchChatMessages = (chatId?: string) => {
 
 export const useSendMessage = () => {
   const queryClient = useQueryClient();
-
   const mutation = useMutation({
       mutationFn : async (payload : SendMessageInput) => {
         const response = await graphqlClient.request(sendMessageMutation, {payload})
-        console.log(response)
+        // console.log("res",response)
+
         return response;
       },
       onMutate: (payload) => toast.loading('Sending message', { id: '1' }),

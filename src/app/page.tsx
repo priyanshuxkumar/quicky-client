@@ -2,21 +2,21 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useLoginUser } from "../../hooks/user";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   //Checking if the user is already logged in or not
-  // const router = useRouter();
-  // const { user, isLoading } = useCurrentUser();
-
-  // useEffect(()=> {
-  //   const isUserLogin = () => {
-  //     if (!isLoading && user) {
-  //       router.push('/');
-  //     }
-  //   }
-  //   isUserLogin()
-  // },[isLoading , user , router])
+  const router = useRouter();
+ 
+  useEffect(() => {
+    const isUserLogin = () => {
+      if (window.localStorage.getItem("__token__")) {
+        router.push("/chats");
+      }
+    };
+    isUserLogin();
+  }, [router]);
 
   const {mutate} = useLoginUser()
 

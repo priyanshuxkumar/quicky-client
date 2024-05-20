@@ -20,8 +20,9 @@ import Link from "next/link";
 import Menu from "@/components/Menu";
 import { QuickyLayout } from "@/components/Layout/QuickyLayout";
 
-const MessagesRenderPage = () => {
-  
+
+
+const MessagesRenderPage = () => {  
   const { selectedChatId, isChatBoxOpen, recipientUser }: any = useChatContext();
   const openChat = useFetchChatMessages(selectedChatId);
 

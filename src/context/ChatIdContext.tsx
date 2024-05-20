@@ -5,8 +5,8 @@ import { User } from '../../gql/graphql';
 
 interface ChatContextType {
     selectedChatId: string | null;
-    isChatBoxOpen: boolean;
     setSelectedChatId: (chatId: string) => void;
+    isChatBoxOpen: boolean;
     setIsChatBoxOpen: (isOpen: boolean) => void;
     recipientUser: User | null;
     setRecipientUser: (User: User) => void;
