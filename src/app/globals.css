@@ -90,7 +90,7 @@
     }
     /* Scrollbar Styling */
     .scrollbar-style::-webkit-scrollbar {
-      width: 7px;
+      width: 5px;
     }
 
     .scrollbar-style::-webkit-scrollbar-track {
@@ -102,7 +102,7 @@
     .scrollbar-style::-webkit-scrollbar-thumb {
       -webkit-border-radius: 10px;
       border-radius: 10px;
-      background: #CCCCCC; 
+      background: #afafaf; 
     }
 
     input:checked ~ .dot {
@@ -119,5 +119,4 @@
       display: block; 
       opacity: 1;
     }
-
   }

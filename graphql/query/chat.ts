@@ -2,12 +2,12 @@ import { graphql } from "../../gql";
 
 export const fetchChatMessagesQuery = graphql(`
   #graphql
-  query FetchChatMessages($chatId: ID!) {
-    fetchAllMessages(chatId: $chatId) {
+  query FetchChatMessages($chatId: ID $recipientId: ID) {
+    fetchAllMessages(chatId: $chatId recipientId: $recipientId) {
       id
-      content
       senderId
       recipientId
+      content
       createdAt
     }
   }
@@ -35,3 +35,10 @@ export const fetchAllChatsQuery = graphql(`
     }
   }
 `);
+
+export const getSignedUrlOfChatQuery = graphql(`
+  #graphql
+  query GetSignedUrlOfChat( $imageName: String! $imageType: String!) {
+    getSignedUrlOfChat(imageName: $imageName imageType: $imageType)
+  }
+`)

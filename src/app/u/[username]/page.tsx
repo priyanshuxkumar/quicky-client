@@ -4,19 +4,27 @@ import { QuickyLayout } from '@/components/Layout/QuickyLayout'
 import Image from 'next/image'
 import React, { useMemo } from 'react'
 
-import { Mail ,AtSign, ChevronLeft , Pencil} from 'lucide-react';
-import Link from 'next/link';
+import { Mail ,AtSign, ChevronLeft , Pencil, Lock} from 'lucide-react';
 import { useCurrentUser } from '../../../../hooks/user';
+import { useRouter } from 'next/navigation';
+import Link from "next/link";
+
 
 
 interface UserProfilePageContentColumns {
     title: string;
     icon: React.ReactNode;
     subtitle?: string;
+    link?: string
   }
 
 const UserProfilePage = () => {
     const {user} = useCurrentUser();
+    const router = useRouter()
+
+    const handleBackClick = () => {
+      router.back();
+    };
     
     //Render userprofile columns
     const sidebarMenuItems: UserProfilePageContentColumns[] = useMemo(
@@ -25,11 +33,19 @@ const UserProfilePage = () => {
           title: `${user?.email}`,
           icon: <Mail />,
           subtitle: "Email",
+          link: '#'
         },
         {
           title: `${user?.username}`,
           icon: <AtSign />,
           subtitle: "Username",
+          link: '#'
+        },
+        {
+          title: `Password`,
+          icon: <Lock />,
+          subtitle: "Change password",
+          link: '/change-password'
         },
       ],
       [user]
@@ -40,11 +56,11 @@ const UserProfilePage = () => {
       <div>
         <div className="flex border-b-[0.1px] w-full px-4 py-4 gap-6 items-center justify-between sticky top-0 z-10">
           <div className='flex items-center gap-3'>
-            <Link href={'/chats'}>
-                <div className="cursor-pointer">
+            
+                <div onClick={handleBackClick} className="cursor-pointer">
                     <ChevronLeft size={24} className="text-black dark:text-white " />
                 </div>
-            </Link>
+           
             <div>
                 <p className="text-black text-lg dark:text-white ">{user?.firstname}</p>
             </div>
@@ -62,7 +78,7 @@ const UserProfilePage = () => {
                 <Image
                 className="h-32 w-32 rounded-full object-cover"
                 src={user?.avatar}
-                alt=""
+                alt="avatar"
                 width={100}
                 height={100}
             />
@@ -77,7 +93,8 @@ const UserProfilePage = () => {
         </div>
 
         {sidebarMenuItems.map((item, index)=>( 
-            <div key={index} className="mt-2 hover:bg-slate-200 hover:dark:bg-[#303030] py-2 px-4 rounded-lg dark:border-gray-800 transition-all">
+          <div key={index} className="mt-2 hover:bg-slate-200 hover:dark:bg-[#303030] py-2 px-4 rounded-lg dark:border-gray-800 transition-all cursor-pointer">
+              <Link href={`/u/${user?.username}${item?.link}`}>
                 <div className="flex gap-3 items-center">
                     <div>
                         <span className='text-gray-500 dark:text-white '> {item.icon} </span>
@@ -90,8 +107,8 @@ const UserProfilePage = () => {
                         <p className="truncate text-sm text-gray-500">{item.subtitle}</p>
                     </div>
                 </div>
+              </Link>
             </div>
-
         ))}
 
       </div>

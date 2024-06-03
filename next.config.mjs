@@ -29,6 +29,11 @@ const nextConfig = {
             hostname: 'www.freepik.com',
             pathname: '**',
           },
+          {
+            protocol: 'https',
+            hostname: 'priyanshu-quicky-dev.s3.ap-south-1.amazonaws.com',
+            pathname: '**',
+          },
         ]
       },
 };

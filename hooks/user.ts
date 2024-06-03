@@ -8,7 +8,7 @@ import { fetchAllChatsQuery, fetchChatMessagesQuery } from "../graphql/query/cha
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { sendMessageMutation } from "../graphql/mutation/chat";
-import { useChatContext } from "@/context/ChatIdContext";
+import { useChatContext } from "@/context/ChatContext";
 import socket from "@/lib/socket";
 
 
@@ -83,28 +83,22 @@ export const useFetchAllChats = () => {
 
 
 
-export const useFetchChatMessages = (chatId?: string) => {
-
+export const useFetchChatMessages = (chatId?: string , recipientId?: string) => {
   const { selectedChatId }: any = useChatContext();
-
-  // Use useQuery to manage fetching the chat messages
-  socket.emit("join chat", selectedChatId);
-
-  const query = useQuery({
-      queryKey: ['chat-messages', chatId], // Unique query key for caching
+  
+    const query = useQuery({
+      queryKey: ['chat-messages', chatId , recipientId], // Unique query key for caching
       queryFn: () => {
-        if (chatId) {
-          // Fetch chat messages only if chatId is provided
-          return graphqlClient.request(fetchChatMessagesQuery, { chatId });
-        } else {
-          // Return empty array if chatId is not provided
+        if (chatId || recipientId) {
+          socket.emit("join chat", selectedChatId);
+          return graphqlClient.request(fetchChatMessagesQuery, { chatId : chatId, recipientId : recipientId});
+          
+        }else {
           return { fetchAllMessages: [] };
         }
       },
-      enabled: !!chatId, // Enable query only if chatId is provided
+      enabled: !!chatId,
   });
-
-  // Return the data, loading status, and error from the query
   return {
       chatMessages: query.data?.fetchAllMessages,
   };
@@ -115,8 +109,6 @@ export const useSendMessage = () => {
   const mutation = useMutation({
       mutationFn : async (payload : SendMessageInput) => {
         const response = await graphqlClient.request(sendMessageMutation, {payload})
-        // console.log("res",response)
-
         return response;
       },
       onMutate: (payload) => toast.loading('Sending message', { id: '1' }),

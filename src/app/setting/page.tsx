@@ -1,5 +1,3 @@
-"use client";
-
 import { QuickyLayout } from "@/components/Layout/QuickyLayout";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { ChevronLeft } from "lucide-react";
@@ -7,7 +5,6 @@ import Link from "next/link";
 import React from "react";
 
 const Setting = () => {
-  
   return (
     <QuickyLayout>
       <>

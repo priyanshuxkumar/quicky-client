@@ -1,8 +1,8 @@
 import { LoaderCircle } from "lucide-react";
 import React from "react";
 
-const Loading = () => {
-  return <LoaderCircle size={36} className="animate-spin" />;
+const Loading = ({size}) => {
+  return <LoaderCircle size={size} className="animate-spin" />;
 };
 
 export default Loading;

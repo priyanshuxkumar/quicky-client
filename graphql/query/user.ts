@@ -9,7 +9,7 @@ export const getCurrentUserQuery = graphql(`
             firstname
             lastname
             email
-            avatar 
+            avatar  
         }
     }
 `)
@@ -42,8 +42,17 @@ export const getUserByUsernameQuery = graphql(`
             users {
                 chat {
                     id
+                
                 }
-            }
+            }  
         }
+    }
+`)
+
+
+export const getSignedUrlOfAvatarQuery = graphql(`
+    #graphql
+    query GetSignedUrlOfAvatar($imageName: String! $imageType: String!) {
+        getSignedUrlOfAvatar(imageName: $imageName imageType: $imageType)
     }
 `)

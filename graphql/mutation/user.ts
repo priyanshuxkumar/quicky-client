@@ -43,5 +43,26 @@ export const verifyOTPMutation = graphql(`
     }
 `)
 
+export const updateUserProfileDetailsMutation = graphql(`
+    #graphql
+    mutation UpdateUserProfileDetails($payload: UpdateUserProfileDetailsInput!){
+      updateUserProfileDetails(payload: $payload) {
+        firstname
+        lastname
+        username
+        avatar
+      }
+    }
+`)
 
+
+export const changePasswordMutation = graphql(`
+  #graphql
+  mutation ChangePassword($oldPassword: String!, $newPassword: String!, $confirmPassword: String!){
+    changePassword(oldPassword: $oldPassword, newPassword: $newPassword, confirmPassword: $confirmPassword) {
+      success
+      message
+    }
+  }
+`)
 

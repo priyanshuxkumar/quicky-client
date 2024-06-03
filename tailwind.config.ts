@@ -1,4 +1,6 @@
+import { url } from "inspector"
 import type { Config } from "tailwindcss"
+import ChatBackground from "./public/ChatBackground.png"
 
 const config = {
   darkMode: ["class"],

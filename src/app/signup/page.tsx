@@ -13,13 +13,12 @@ import { graphqlClient } from "../../../clients/api";
 import { checkEmailIsValidQuery, checkUsernameIsValidQuery } from "../../../graphql/query/user";
 import { sendOTPVerificationEmailMutation, verifyOTPMutation } from "../../../graphql/mutation/user";
 import EmailPage from "./verify/[username]/page";
-import Spinner from "@/components/spinner";
+import Loading from "../loading";
 
 const Page = () => {
     //Checking if the user is already logged in or not
     const router = useRouter();
-    const { user, isLoading } = useCurrentUser();
-  
+    
     //Checking if the user is already logged in or not
     useEffect(() => {
       const isUserLogin = () => {
@@ -115,7 +114,7 @@ const Page = () => {
       if(res?.verifyOTP.message === "OTP verified successfully!"){
         await handleRegisterForm()
         setIsSubmitting(false)
-        router.push('/login')
+        router.push('/')
       }
     } catch (error) {
       setIsSubmitting(false)
@@ -143,19 +142,19 @@ const Page = () => {
     <>
     {currentStep === 1 && 
     (<section>
-      <div className="flex items-center justify-center px-4 py-4 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
+      <div className="dark:bg-black h-screen flex items-center justify-center px-4 py-4 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
         <div className="xl:mx-auto xl:w-full xl:max-w-sm 2xl:max-w-md">
           <div className="mb-4 flex justify-center">
             <h1 className="font-bold text-4xl">Quicky</h1>
           </div>
-          <h2 className="text-center text-lg font-semibold leading-tight text-black">
+          <h2 className="text-center text-lg font-semibold leading-tight text-black dark:text-white">
             Sign up to create account
           </h2>
-          <p className="mt-1 text-center text-base text-gray-600">
+          <p className="mt-1 text-center text-base text-gray-600 dark:text-gray-200">
             Already have an account?{" "}
             <Link
-              href="/login"
-              className="font-medium text-black transition-all duration-200 hover:underline"
+              href="/"
+              className="font-medium text-black transition-all duration-200 hover:underline dark:text-white"
             >
               Sign In
             </Link>
@@ -163,13 +162,13 @@ const Page = () => {
           <form className="mt-8">
             <div className="space-y-5">
             
-              <div className="mt-2  flex justify-between items-center border border-gray-300 rounded-md px-2">
+              <div className="mt-2 flex justify-between items-center border border-gray-300 rounded-md px-2 dark:text-white">
                 <label htmlFor="lastname" className="w-full">
                   <input
                     onChange={handleChange}
                     value={formData.email}
                     name="email"
-                    className="flex h-10 w-full px-2 py-2 text-sm focus:border-none focus:outline-none"
+                    className="flex h-10 w-full px-2 py-2 text-sm focus:border-none focus:outline-none bg-transparent"
                     type="email"
                     placeholder="Email"
                     id="email"
@@ -244,9 +243,9 @@ const Page = () => {
                 <button
                   disabled={!formData.email || !formData.firstname || !formData.lastname || !formData.password || !formData.username}
                   onClick={handleOTPVerificationEmailSend}
-                  className={`inline-flex h-10 w-full items-center justify-center rounded-xl bg-black px-3.5 py-2.5 font-semibold leading-7 text-white hover:bg-black/80`}
+                  className={`inline-flex h-10 w-full items-center justify-center rounded-md bg-black dark:text-black dark:bg-white px-3.5 py-2.5 font-semibold leading-7 text-white hover:bg-black/80 cursor-pointer`}
                 >
-                  {isSubmitting ? (<> <Spinner/>  Please wait </>): ('Signup')}                  
+                  {isSubmitting ? (<> <Loading size={28}/>  Please wait </>): ('Signup')}                  
                 </button>
               </div>
             </div>

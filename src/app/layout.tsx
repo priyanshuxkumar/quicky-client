@@ -8,7 +8,7 @@ const noto_sans = Noto_Sans({ subsets: ["latin"] });
 import { Toaster } from "react-hot-toast";
 
 import { Providers } from "../../QueryClientProvider";
-import { ChatIdProvider } from "@/context/ChatIdContext";
+import { ChatProvider } from "@/context/ChatContext";
 
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 
@@ -25,14 +25,14 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning={true}>
       <Providers>
-        <ChatIdProvider>
+        <ChatProvider>
           <body className={noto_sans.className}>
             <NextThemesProvider attribute="class" defaultTheme="light">
               {children}
               <Toaster />
             </NextThemesProvider>
           </body>
-        </ChatIdProvider>
+        </ChatProvider>
       </Providers>
     </html>
   );

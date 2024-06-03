@@ -14,11 +14,11 @@ import {
   useSendMessage,
 } from "../../../../../hooks/user";
 
-import { useChatContext } from "@/context/ChatIdContext";
+import { useChatContext } from "@/context/ChatContext";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import Menu from "@/components/Menu";
-import { QuickyLayout } from "@/components/Layout/QuickyLayout";
+
 
 
 

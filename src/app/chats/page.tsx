@@ -2,22 +2,23 @@
 
 import ChatCard from "@/components/ChatCard/index";
 import { QuickyLayout } from "@/components/Layout/QuickyLayout";
-import { useChatContext } from "@/context/ChatIdContext";
-import { Suspense, useEffect, useState } from "react";
+import { useChatContext } from "@/context/ChatContext";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { getUserByUsernameQuery } from "../../../graphql/query/user";
 import { User, Chat } from "../../../gql/graphql";
 import { useCurrentUser, useFetchAllChats } from "../../../hooks/user";
 import { graphqlClient } from "../../../clients/api";
-import {LoaderCircle} from "lucide-react"
+import Loading from "../loading";
 
 
 
 export default function Chats() {
   const router = useRouter();
-  const { user, isLoading } = useCurrentUser();
+  const { user } = useCurrentUser();
 
+  //checking user is authenticated or not
   useEffect(() => {
     const isUserLogin = () => {
       if (!window.localStorage.getItem("__token__")) {
@@ -25,12 +26,11 @@ export default function Chats() {
       }
     };
     isUserLogin();
-  }, [isLoading, user, router]);
+  }, [ user, router]);
 
-  const { chats } = useFetchAllChats();
+  const { isLoading , chats } = useFetchAllChats();
 
-  const { setSelectedChatId, setIsChatBoxOpen, setRecipientUser } =
-    useChatContext();
+  const { setSelectedChatId, setIsChatBoxOpen, setRecipientUser } = useChatContext();
 
   const handleSelectedChat = (chatId: string | any) => {
     setSelectedChatId(chatId);
@@ -39,6 +39,8 @@ export default function Chats() {
 
   //Search user code starts here
   const [searchQuery, setSearchQuery] = useState("");
+
+  //All searched users
   const [searchedUsers, setSearchedUsers] = useState<User[] | null>(null);
 
   const getSearchUser = async (e: any) => {
@@ -51,12 +53,24 @@ export default function Chats() {
     }
   };
 
+  //that single user who got click on searched results
   const [searchedUser, setSearchedUser] = useState<User | null>(null);
 
-  const handleSearchUserClickActions = () => {
+
+  const handleSearchUserClickActions = (user:User) => { //Click user from search users result
     setIsChatBoxOpen(true);
-    setRecipientUser(searchedUser);
-    setSelectedChatId(searchedUser?.users[0]?.chat?.id); //search user chatID
+    if(user.id){
+      setRecipientUser(user as User);
+      const recipientUserChatsIds = user.users?.map((chat)=> chat?.chat?.id);
+      
+      const currentUserChatsIds = chats?.map((chat)=> chat.id);
+
+      if(recipientUserChatsIds && currentUserChatsIds){
+        const chatIdWithSearchUser = recipientUserChatsIds?.filter(id => currentUserChatsIds?.includes(id))
+        setSelectedChatId(chatIdWithSearchUser[0] || "")
+      }
+    }
+    setSearchQuery("");
   };
 
   return (
@@ -70,7 +84,7 @@ export default function Chats() {
                 <input
                   onChange={getSearchUser}
                   value={searchQuery}
-                  className="transition duration-500 flex h-11 w-full rounded-xl border  bg-transparent px-5 py-2 text-base placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-800  focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="transition duration-500 flex h-11 w-full rounded-xl border bg-transparent px-5 py-2 text-base placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-800  focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
                   type="text"
                   id="search"
                   placeholder="Search"
@@ -81,18 +95,15 @@ export default function Chats() {
           </div>
 
           {searchQuery && searchQuery?.length ? (
-            <div className="searched users result min-h-screen">
+            <div className="searched-users-result min-h-screen">
               {searchedUsers &&
                 searchedUsers.map((user) => (
-                  <div
-                    onClick={() => setSearchedUser(user)}
+                  <div 
+                    onClick={()=> handleSearchUserClickActions(user)}
                     key={user?.id}
                     className={`bg-white dark:bg-[#303030] rounded-2xl px-4  py-2 my-3 cursor-pointer`}
                   >
-                    <div
-                      onClick={handleSearchUserClickActions}
-                      className="flex gap-4 items-center"
-                    >
+                    <div  className="flex gap-4 items-center">
                       <div className="w-14 h-14 flex flex-col justify-center">
                         {user && user?.avatar && (
                           <Image
@@ -133,21 +144,29 @@ export default function Chats() {
               <h1 className="font-bold text-3xl my-5 px-7 dark:text-white">
                 Chats
               </h1>
-              {chats ? (
-                chats.map((chat) => (
-                  <ChatCard
+
+              {chats && chats.map((chat) => (<ChatCard
                     onClick={() => handleSelectedChat(chat?.id)}
                     key={chat?.id}
-                    data={chat as Chat}
-                  />
-                ))
-              ) : (
-                <Suspense fallback={null}>
-                  <div className="flex justify-center items-center h-full">
-                    <LoaderCircle size={36} className="animate-spin"/>
-                  </div>
-                </Suspense>
+                    data={chat as Chat}/>)
               )}
+
+              
+              {/* State when no chat exists  */}
+              {chats && chats.length === 0 && 
+              <div className="flex justify-center items-center h-full">
+                   <span className="text-2xl dark:text-white font-medium">No Chats available</span>
+              </div>
+              }
+
+
+              {/* Chat Loading State */}
+              { isLoading && 
+              <div className="flex justify-center items-center h-full">
+                   <Loading size={36}/>
+              </div>
+              }
+
             </div>
           )}
       </QuickyLayout>

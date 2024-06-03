@@ -18,12 +18,16 @@ const documents = {
     "\n    #graphql\n    mutation RegisterUser($payload: UserCreateInput!){\n      registerUser(payload: $payload) {\n        username\n        firstname\n        lastname\n      }\n    }\n": types.RegisterUserDocument,
     "\n    #graphql\n    mutation SendOTPVerificationEmail($email: String!){\n      sendOTPVerificationEmail(email: $email) {\n        success\n        message\n      }\n    }\n": types.SendOtpVerificationEmailDocument,
     "\n    #graphql\n    mutation VerifyOTP($email: String!, $otp:String!){\n      verifyOTP(email: $email , otp: $otp) {\n        success\n        message\n      }\n    }\n": types.VerifyOtpDocument,
-    "\n  #graphql\n  query FetchChatMessages($chatId: ID!) {\n    fetchAllMessages(chatId: $chatId) {\n      id\n      content\n      senderId\n      recipientId\n      createdAt\n    }\n  }\n": types.FetchChatMessagesDocument,
+    "\n    #graphql\n    mutation UpdateUserProfileDetails($payload: UpdateUserProfileDetailsInput!){\n      updateUserProfileDetails(payload: $payload) {\n        firstname\n        lastname\n        username\n        avatar\n      }\n    }\n": types.UpdateUserProfileDetailsDocument,
+    "\n  #graphql\n  mutation ChangePassword($oldPassword: String!, $newPassword: String!, $confirmPassword: String!){\n    changePassword(oldPassword: $oldPassword, newPassword: $newPassword, confirmPassword: $confirmPassword) {\n      success\n      message\n    }\n  }\n": types.ChangePasswordDocument,
+    "\n  #graphql\n  query FetchChatMessages($chatId: ID $recipientId: ID) {\n    fetchAllMessages(chatId: $chatId recipientId: $recipientId) {\n      id\n      senderId\n      recipientId\n      content\n      createdAt\n    }\n  }\n": types.FetchChatMessagesDocument,
     "\n  #graphql\n  query FetchAllChats {\n    fetchAllChats {\n      id\n      users {\n        user {\n          id\n          avatar\n          firstname\n          lastname\n          username\n          isActive\n        }\n      }\n      messages {\n            content\n            createdAt\n      }\n    }\n  }\n": types.FetchAllChatsDocument,
-    "\n    #graphql\n    query GetCurrentUser {\n        getCurrentUser {\n            id\n            username\n            firstname\n            lastname\n            email\n            avatar \n        }\n    }\n": types.GetCurrentUserDocument,
+    "\n  #graphql\n  query GetSignedUrlOfChat( $imageName: String! $imageType: String!) {\n    getSignedUrlOfChat(imageName: $imageName imageType: $imageType)\n  }\n": types.GetSignedUrlOfChatDocument,
+    "\n    #graphql\n    query GetCurrentUser {\n        getCurrentUser {\n            id\n            username\n            firstname\n            lastname\n            email\n            avatar  \n        }\n    }\n": types.GetCurrentUserDocument,
     "\n    #graphql\n    query CheckUsernameIsValid($username: String!) {\n        checkUsernameIsValid(username: $username)\n    }\n": types.CheckUsernameIsValidDocument,
     "\n    #graphql\n    query CheckEmailIsValid($email: String!) {\n        checkEmailIsValid(email: $email)\n    }\n": types.CheckEmailIsValidDocument,
-    "\n    #graphql\n    query GetUserByUsername($username: String!){\n        getUserByUsername(username: $username){\n            id\n            firstname\n            lastname\n            username\n            avatar\n            isActive\n            users {\n                chat {\n                    id\n                }\n            }\n        }\n    }\n": types.GetUserByUsernameDocument,
+    "\n    #graphql\n    query GetUserByUsername($username: String!){\n        getUserByUsername(username: $username){\n            id\n            firstname\n            lastname\n            username\n            avatar\n            isActive\n            users {\n                chat {\n                    id\n                \n                }\n            }  \n        }\n    }\n": types.GetUserByUsernameDocument,
+    "\n    #graphql\n    query GetSignedUrlOfAvatar($imageName: String! $imageType: String!) {\n        getSignedUrlOfAvatar(imageName: $imageName imageType: $imageType)\n    }\n": types.GetSignedUrlOfAvatarDocument,
 };
 
 /**
@@ -63,7 +67,15 @@ export function graphql(source: "\n    #graphql\n    mutation VerifyOTP($email: 
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  #graphql\n  query FetchChatMessages($chatId: ID!) {\n    fetchAllMessages(chatId: $chatId) {\n      id\n      content\n      senderId\n      recipientId\n      createdAt\n    }\n  }\n"): (typeof documents)["\n  #graphql\n  query FetchChatMessages($chatId: ID!) {\n    fetchAllMessages(chatId: $chatId) {\n      id\n      content\n      senderId\n      recipientId\n      createdAt\n    }\n  }\n"];
+export function graphql(source: "\n    #graphql\n    mutation UpdateUserProfileDetails($payload: UpdateUserProfileDetailsInput!){\n      updateUserProfileDetails(payload: $payload) {\n        firstname\n        lastname\n        username\n        avatar\n      }\n    }\n"): (typeof documents)["\n    #graphql\n    mutation UpdateUserProfileDetails($payload: UpdateUserProfileDetailsInput!){\n      updateUserProfileDetails(payload: $payload) {\n        firstname\n        lastname\n        username\n        avatar\n      }\n    }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  #graphql\n  mutation ChangePassword($oldPassword: String!, $newPassword: String!, $confirmPassword: String!){\n    changePassword(oldPassword: $oldPassword, newPassword: $newPassword, confirmPassword: $confirmPassword) {\n      success\n      message\n    }\n  }\n"): (typeof documents)["\n  #graphql\n  mutation ChangePassword($oldPassword: String!, $newPassword: String!, $confirmPassword: String!){\n    changePassword(oldPassword: $oldPassword, newPassword: $newPassword, confirmPassword: $confirmPassword) {\n      success\n      message\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  #graphql\n  query FetchChatMessages($chatId: ID $recipientId: ID) {\n    fetchAllMessages(chatId: $chatId recipientId: $recipientId) {\n      id\n      senderId\n      recipientId\n      content\n      createdAt\n    }\n  }\n"): (typeof documents)["\n  #graphql\n  query FetchChatMessages($chatId: ID $recipientId: ID) {\n    fetchAllMessages(chatId: $chatId recipientId: $recipientId) {\n      id\n      senderId\n      recipientId\n      content\n      createdAt\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -71,7 +83,11 @@ export function graphql(source: "\n  #graphql\n  query FetchAllChats {\n    fetc
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n    #graphql\n    query GetCurrentUser {\n        getCurrentUser {\n            id\n            username\n            firstname\n            lastname\n            email\n            avatar \n        }\n    }\n"): (typeof documents)["\n    #graphql\n    query GetCurrentUser {\n        getCurrentUser {\n            id\n            username\n            firstname\n            lastname\n            email\n            avatar \n        }\n    }\n"];
+export function graphql(source: "\n  #graphql\n  query GetSignedUrlOfChat( $imageName: String! $imageType: String!) {\n    getSignedUrlOfChat(imageName: $imageName imageType: $imageType)\n  }\n"): (typeof documents)["\n  #graphql\n  query GetSignedUrlOfChat( $imageName: String! $imageType: String!) {\n    getSignedUrlOfChat(imageName: $imageName imageType: $imageType)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    #graphql\n    query GetCurrentUser {\n        getCurrentUser {\n            id\n            username\n            firstname\n            lastname\n            email\n            avatar  \n        }\n    }\n"): (typeof documents)["\n    #graphql\n    query GetCurrentUser {\n        getCurrentUser {\n            id\n            username\n            firstname\n            lastname\n            email\n            avatar  \n        }\n    }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -83,7 +99,11 @@ export function graphql(source: "\n    #graphql\n    query CheckEmailIsValid($em
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n    #graphql\n    query GetUserByUsername($username: String!){\n        getUserByUsername(username: $username){\n            id\n            firstname\n            lastname\n            username\n            avatar\n            isActive\n            users {\n                chat {\n                    id\n                }\n            }\n        }\n    }\n"): (typeof documents)["\n    #graphql\n    query GetUserByUsername($username: String!){\n        getUserByUsername(username: $username){\n            id\n            firstname\n            lastname\n            username\n            avatar\n            isActive\n            users {\n                chat {\n                    id\n                }\n            }\n        }\n    }\n"];
+export function graphql(source: "\n    #graphql\n    query GetUserByUsername($username: String!){\n        getUserByUsername(username: $username){\n            id\n            firstname\n            lastname\n            username\n            avatar\n            isActive\n            users {\n                chat {\n                    id\n                \n                }\n            }  \n        }\n    }\n"): (typeof documents)["\n    #graphql\n    query GetUserByUsername($username: String!){\n        getUserByUsername(username: $username){\n            id\n            firstname\n            lastname\n            username\n            avatar\n            isActive\n            users {\n                chat {\n                    id\n                \n                }\n            }  \n        }\n    }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    #graphql\n    query GetSignedUrlOfAvatar($imageName: String! $imageType: String!) {\n        getSignedUrlOfAvatar(imageName: $imageName imageType: $imageType)\n    }\n"): (typeof documents)["\n    #graphql\n    query GetSignedUrlOfAvatar($imageName: String! $imageType: String!) {\n        getSignedUrlOfAvatar(imageName: $imageName imageType: $imageType)\n    }\n"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};
