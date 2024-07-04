@@ -76,7 +76,8 @@ const UserProfilePage = () => {
           <div className="flex justify-center">
             {user && user.avatar && 
                 <Image
-                className="h-32 w-32 rounded-full object-cover"
+                priority={true}
+                className="h-32 w-32 rounded-full object-cover ring-2 ring-accent-color ring-offset-2 dark:ring-offset-black"
                 src={user?.avatar}
                 alt="avatar"
                 width={100}
@@ -93,7 +94,7 @@ const UserProfilePage = () => {
         </div>
 
         {sidebarMenuItems.map((item, index)=>( 
-          <div key={index} className="mt-2 hover:bg-slate-200 hover:dark:bg-[#303030] py-2 px-4 rounded-lg dark:border-gray-800 transition-all cursor-pointer">
+          <div key={index} className="mt-2 mx-2 hover:bg-primary hover:dark:bg-[#303030] py-2 px-4 rounded-lg dark:border-gray-800 transition-all cursor-pointer">
               <Link href={`/u/${user?.username}${item?.link}`}>
                 <div className="flex gap-3 items-center">
                     <div>

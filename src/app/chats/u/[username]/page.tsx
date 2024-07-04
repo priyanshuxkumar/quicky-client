@@ -82,12 +82,12 @@ const MessagesRenderPage = () => {
           </div>
 
           <div className="icons flex gap-4">
-            <div className="transition duration-500 hover:bg-slate-100 dark:hover:bg-[#303030] rounded-full p-2 cursor-pointer">
+            <div className="transition duration-500 hover:bg-primary dark:hover:bg-[#303030] rounded-full p-2 cursor-pointer">
               <Phone size={20} />
             </div>
             <div
               onClick={handleMessageMenu}
-              className="transition duration-500 ease-in-out hover:bg-slate-100 dark:hover:bg-[#303030] rounded-full p-2 cursor-pointer"
+              className="transition duration-500 ease-in-out hover:bg-primary dark:hover:bg-[#303030] rounded-full p-2 cursor-pointer"
             >
               <EllipsisVertical size={20} />
             </div>

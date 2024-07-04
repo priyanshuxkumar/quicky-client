@@ -1,7 +1,7 @@
 "use client";
 
 import {useCallback, useEffect, useMemo, useRef, useState } from "react";
-
+import { format } from 'date-fns';
 import {
   CircleUserRound,
   Bolt,
@@ -15,9 +15,8 @@ import {
   ImagePlus
 } from "lucide-react";
 import Link from "next/link";
-
+import { usePathname } from "next/navigation";
 import axios from "axios";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import MessageCard from "../MessageCard";
 import Image from "next/image";
 import { useRouter} from "next/navigation";
@@ -32,12 +31,16 @@ import { useChatContext } from "@/context/ChatContext";
 import Menu from "../Menu";
 import { graphqlClient } from "../../../clients/api";
 import { sendMessageMutation } from "../../../graphql/mutation/chat";
-import Loading from "@/app/loading";
+import Loading from "@/components/loading";
 import Logout from "../Logout";
 import { getSignedUrlOfChatQuery } from "../../../graphql/query/chat";
 
 import socket from "@/lib/socket";
 import UserProfileContainer from "../UserProfileContainer";
+import React from "react";
+import { groupMessagesByDate } from "@/config/TimeServices";
+import SendButton from "../Button";
+import { sendMessage } from "@/helpers/sendMessage";
 
 interface QuickySidebarButton {
   title: string;
@@ -49,8 +52,16 @@ interface QuickyLayoutProps {
   children: React.ReactNode;
 }
 
+interface GroupedMessages {
+  [date: string]: Message[];
+};
+
 export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
-  const {user } = useCurrentUser();
+  const { user } = useCurrentUser();
+  
+  useEffect(()=> {
+    socket.emit("setup", user?.id);
+  },[user?.id])
 
   const router = useRouter();
 
@@ -80,19 +91,29 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
     [user?.username]
   );
 
+  //route
+  const pathname = usePathname();
+  
   const [isMessageSending , setIsMessageSending] = useState(false);
 
   //Message Code Starts Here
   const { selectedChatId, isChatBoxOpen, recipientUser , setIsChatBoxOpen}: any = useChatContext();
- 
-  // console.log("sel" , selectedChatId,"rec" ,  recipientUser?.id)
 
-  // const openChat = useFetchChatMessages( selectedChatId , recipientUser?.id ) ;
-  const { chatMessages } = useFetchChatMessages( selectedChatId , recipientUser?.id) ;
 
-  // console.log("openchat" , openChat)
+  //Lazzy-Loading
+  const limit = 15;
+  const [offset, setOffset] = useState(0);
+  const [hasMoreMsg , setHasMoreMsg] = useState(false);
+
+  //Fetch messages from hook
+  const {isLoading, chatMessages} = useFetchChatMessages( selectedChatId , recipientUser?.id , limit , offset) ;
+  // console.log(chatMessages)
+
   const [messageContent, setMessageContent] = useState('');
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[] >([]);
+  
+  //Grouped Msg's -
+  const [groupedMessages, setGroupedMessages] = useState<GroupedMessages>({});
 
   //Send Image On chat as message
   const [imageURL , setImageURL] = useState('')
@@ -104,7 +125,7 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
 
         const file:File | undefined | null |string = input.files?.item(0)
         if(!file)return
-
+        console.log("quicky file" , file)
         const {getSignedUrlOfChat} = await graphqlClient.request( getSignedUrlOfChatQuery,{ 
           imageName: file.name,
           imageType: file.type
@@ -140,36 +161,50 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
   },[handleInputChangeFile])
 
   useEffect(() => {
-    if (chatMessages || recipientUser) {
-      setMessages(chatMessages);
+    if (chatMessages) {
+      // setMessages(chatMessages as Message[]);
+      setGroupedMessages(groupMessagesByDate(chatMessages as Message[]));      
     }else {
-      setMessages([]); // Ensure messages are reset if no chat messages are present
+      // setMessages([]); // Ensure messages are reset if no chat messages are present
+      setGroupedMessages({});
     }
   }, [chatMessages , selectedChatId , recipientUser]);
 
   //SocketIO
   useEffect(() => {
-    socket.on('receivedMessage', (newMessage) => {
-      if(newMessage?.chatId != selectedChatId) {
+    socket.on("receivedMessage", (newMessage) => {
+      if (newMessage?.chatId != selectedChatId) {
         // TODO - Give Notification
-        // toast.success(`New Message ${newMessage?.content}`, {id: '1'})
       };
-      
-      if(newMessage?.chatId === selectedChatId){
-      setMessages((prevMessages) => {
-        if (!prevMessages) {
-          return [newMessage];
-        } else {
-          return [...prevMessages, newMessage];
-        }
-      });
-    }
+      if (newMessage?.chatId === selectedChatId) {
+        // Update groupedMessages with the new message
+        setGroupedMessages((prevGroupedMessages: GroupedMessages) => {
+          const newGroupedMessages = { ...prevGroupedMessages };
 
+          // Convert createdAt to Date object
+          const createdAtDate = new Date(parseInt(newMessage?.createdAt)); // Assuming newMessage.createdAt is in milliseconds as a string
+
+          // Format date to 'yyyy-MM-dd' for grouping
+          const messageDate = format(createdAtDate, "yyyy-MM-dd");
+
+          // Check if this date exists in groupedMessages
+          if (newGroupedMessages[messageDate]) {
+            newGroupedMessages[messageDate] = [
+              newMessage,
+              ...newGroupedMessages[messageDate],
+            ];
+          } else {
+            newGroupedMessages[messageDate] = [newMessage];
+          }
+
+          return newGroupedMessages;
+        });
+      }
     });
     return () => {
-      socket.off('receivedMessage');
+      socket.off("receivedMessage");
     };
-  }, [selectedChatId , messages]);
+  }, [selectedChatId]);
 
   //Typing Implementation
   const [isTyping, setIsTyping] = useState(false);
@@ -178,8 +213,8 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
 
   useEffect(() => {
     // Listen for typing events
-    socket.on('typing', (data) => {
-      setTypingIndicator(`${data?.username} is typing...`);
+    socket.on('typing', () => {
+      setTypingIndicator(`typing...`);
     });
 
     // Listen for stop typing events
@@ -210,33 +245,43 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
       },5000)
   };
 
-  const handleSendMessage = async(e: { preventDefault: () => void }) => {
-    setIsMessageSending(true)
+  const handleSendMessage = async (e:any) => {
     e.preventDefault();
-    if (messageContent.trim() === '') {
-      toast.error('Message cannot be empty');
-      return;
-    }
-    try {
-      const variables = {
-        chatId: selectedChatId || null,
-        content: messageContent,
-        recipientId: recipientUser?.id,
-      };
-      const response = await sendMessageFn(variables)
-      if(response){
-        socket.emit("sendMessage", response);
-      }else{
-        toast.error("Error sending message");
-      }
-      setMessageContent("");
-      setIsMessageSending(false)
-    } catch (error) {
-      console.error("Error occured while login:", error);
-      setIsMessageSending(false)
-      setMessageContent('')
-    }
+    await sendMessage({ 
+      messageContent, 
+      selectedChatId, 
+      recipientUser, 
+      setIsMessageSending, 
+      setMessageContent 
+    });
   };
+  // const handleSendMessage = async(e: { preventDefault: () => void }) => {
+  //   setIsMessageSending(true)
+  //   e.preventDefault();
+  //   if (messageContent.trim() === '') {
+  //     toast.error('Message cannot be empty');
+  //     return;
+  //   }
+  //   try {
+  //     const variables = {
+  //       chatId: selectedChatId || null,
+  //       content: messageContent,
+  //       recipientId: recipientUser?.id,
+  //     };
+  //     const response = await sendMessageFn(variables)
+  //     if(response){
+  //       socket.emit("sendMessage", response);
+  //     }else{
+  //       toast.error("Error sending message");
+  //     }
+  //     setMessageContent("");
+  //     setIsMessageSending(false)
+  //   } catch (error) {
+  //     console.error("Error occured while login:", error);
+  //     setIsMessageSending(false)
+  //     setMessageContent('')
+  //   }
+  // };
 
   //Handle Message Component Menu
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -260,9 +305,8 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
     const scrollToBottom = () => {
       messagesEndRef.current?.scrollIntoView( {behavior: 'smooth'} );
     };
-
     scrollToBottom();
-  }, [messages , typingIndicator]);
+  }, [groupedMessages , typingIndicator]);
 
   
 
@@ -271,7 +315,7 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
    const handleLogoutPageOpenState = ()=> {
      setIsLogoutPageOpen(!isLogoutPageOpen)
    };
- 
+
    //Logout Fn
    const handleLogout = () => {
      toast.loading("Logging out...", { id: "2" });
@@ -282,38 +326,22 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
    };
   return (
     <>
-    <div className="whole-page grid grid-cols-12 h-screen w-screen bg-[#F7FAFC] dark:bg-black overflow-hidden">
+    <div className="whole-page grid grid-cols-12 h-screen w-screen bg-white dark:bg-dark-primary-bg overflow-hidden">
       {/* Column 1 */}
-      <div className="sidebar hidden sm:inline sm:col-span-1 relative ">
-        <div className="flex flex-col justify-between items-center h-full py-12">
-          <div className="flex flex-col items-center">
-            {user && user?.avatar && (
-              <Image
-                priority={false}
-                className="inline-block h-12 w-12 rounded-full ring-1 ring-black dark:ring-white ring-offset-1"
-                src={user?.avatar}
-                alt="avatar"
-                height={20}
-                width={20}
-              />
-            )}
-            <span className="flex flex-col mt-2">
-              <span className="text-xs font-medium text-gray-900 dark:text-white">
-                {user?.firstname}
-              </span>
-            </span>
-          </div>
-
-          <div>
-            <ul className="flex flex-col justify-center items-center">
+       {/* only visible sidebar when chatbox is not open on mobile view */}
+      <div className={` sidebar ${isChatBoxOpen && 'hidden'} ${isChatBoxOpen && 'sm:inline-block'} px-2 rounded-2xl sm:rounded-none sm:px-0 bg-primary border sm:border-none sm:mx-0 sm:bg-white dark:bg-dark-primary-bg col-span-12 sm:inline sm:col-span-1 sm:static absolute bottom-0  sm:h-full h-fit w-full`}>
+        <div className="flex flex-col justify-between items-center h-full sm:py-8">
+          <Link href={'/chats'} className="hidden sm:inline-block font-bold text-xl tracking-tighter">Quicky</Link>  
+          <div className="w-full sm:w-fit px-4 sm:mx-0">
+            <ul className="flex sm:flex-col justify-between sm:justify-center items-center">
               {sidebarMenuItems.map((item) => (
                 <li key={item.title}>
                   <Link
-                    className="flex justify-start items-center gap-2 my-3 cursor-pointer rounded-full px-4 py-2"
+                    className="flex justify-start items-center gap-1 sm:my-3 rounded-full px-2 py-2"
                     href={item?.link}
                   >
-                    <span className="transition duration-500 text-3xl hover:bg-white hover:dark:bg-[#303030] hover:ring-1 ring-black ring-offset-2 rounded-full p-2">
-                      {item.icon}
+                    <span className={`${item?.title == 'Search' && 'cursor-not-allowed' } ${pathname == item.link && 'bg-primary border-[1px]  dark:bg-dark-secondary'} transition duration-500 text-3xl cursor-pointer hover:ring-1 ring-black ring-offset-2 rounded-full p-2`}>
+                      {item.icon} 
                     </span>
                   </Link>
                 </li>
@@ -323,9 +351,9 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
 
           <div
             onClick={handleLogoutPageOpenState}
-            className="bg-red-600 p-2 rounded-full cursor-pointer"
+            className="hidden sm:inline-block bg-red-600 p-2 rounded-full cursor-pointer"
           >
-            <CirclePower className="text-3xl text-white" />
+            <CirclePower className="text-3xl text-white"/>
           </div>
         </div>
       </div>
@@ -334,18 +362,18 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
       <div
         className={`main col-span-12 ${
           isChatBoxOpen && "hidden"
-        } sm:inline sm:col-span-4 px-4 border-l-[0.5px] border-gray-300 dark:border-gray-800 h-screen`}
+        } sm:inline sm:col-span-3  border-x-[0.5px] border-gray-300 dark:border-gray-800 h-screen`}
       >
         {props.children}
       </div>
-      
+
       {/* Column 3 */}
-      <div className={`${ isChatBoxOpen ? "inline col-span-12" : "hidden"} sm:inline sm:col-span-7 h-screen ${isUserInfoContainerActive  && "sm:flex"}`}>
+      <div className={`${ isChatBoxOpen ? "inline col-span-12" : "hidden"} sm:inline sm:col-span-8 h-screen ${isUserInfoContainerActive  && "sm:flex"}  dark:bg-dark-primary-bg bg-[#F5F8FA] dark:bg-[radial-gradient(#26355D_1px,transparent_1px)] bg-[radial-gradient(#CCCCCC_1px,transparent_1px)] [background-size:40px_40px]`}>
         {isChatBoxOpen && (
           <>
           <div className="h-screen w-full">
-            <div className="sticky left-0 top-0 right-0 z-10 bg-transparent">
-              <div className="flex justify-between items-center border-gray-200 dark:border-gray-800 px-4 py-1 border-b-[1px] mx-4 dark:bg-black bg-opacity-50 backdrop-filter backdrop-blur-md">
+            <div className="sticky left-0 top-0 right-0 z-5 bg-white dark:bg-dark-primary-bg border-b-[0.5px] border-gray-300 dark:border-gray-800">
+              <div className="flex justify-between items-center px-4 py-1 mx-2">
                 <div className="flex gap-2 items-center">
                   <Link href={"/chats"} className="inline sm:hidden mr-2">
                     <div className="cursor-pointer">
@@ -356,18 +384,22 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
                     </div>
                   </Link>
                   <div onClick={handleUserInfoContainer} className="w-14 h-14 flex flex-col justify-center cursor-pointer">
-                    <Avatar>
-                      <AvatarImage
+                    {recipientUser && recipientUser?.avatar &&
+                    <Image
+                        priority= {false}
+                        className="inline-block h-12 w-12 rounded-full"
                         src={recipientUser?.avatar}
-                        alt="user avatar"
-                      />
-                    </Avatar>
+                        alt="avatar"
+                        height={30}
+                        width={30}
+                    />
+                    }
                   </div>
                   <div className="flex flex-col justify-center">
                     <div className="flex gap-1">
-                      <h5 className="text-[15px] font-medium">
-                        {recipientUser?.firstname}{" "}
-                      </h5>
+                      <p className="text-[15px] font-semibold">
+                        {recipientUser?.firstname}{" "} {recipientUser?.lastname}
+                      </p>
                     </div>
                     <div>
                       {selectedChatId &&
@@ -379,12 +411,12 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
                 </div>
 
                 <div className="icons flex gap-4">
-                  <div className="transition duration-500 hover:bg-slate-100 dark:hover:bg-[#303030] rounded-full p-2 cursor-pointer">
+                  <div className="transition duration-500 hover:bg-primary dark:hover:bg-[#303030] rounded-full p-2 cursor-pointer">
                     <Phone size={20} />
                   </div>
                   <div
                     onClick={handleMessageMenu}
-                    className="transition duration-500 ease-in-out hover:bg-slate-100 dark:hover:bg-[#303030] rounded-full p-2 cursor-pointer"
+                    className="transition duration-500 ease-in-out hover:bg-primary dark:hover:bg-[#303030] rounded-full p-2 cursor-pointer"
                   >
                     <EllipsisVertical size={20} />
                   </div>
@@ -392,52 +424,86 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
                 </div>
               </div>
             </div>
-
+            
             {/* Render Chat Messages  */}
-            <div  className="px-12 h-[82%] overflow-y-scroll scrollbar-style">
-              {messages &&
-                messages?.map((msg) => (
-                  <MessageCard
-                  key={msg?.id}
-                  data={msg as Message}
-                  />
-                )) 
-              }
-              {/* : (<div className="w-full h-full flex justify-center items-center"><Loading size={40}/></div>) */}
+            <div  className="px-8 sm:px-20 h-[82%] overflow-y-scroll scrollbar-style">
+              {/* Loading symbol for fetch more messages  */}
+              {hasMoreMsg && 
+              <div className="flex justify-center w-full">
+                <Loading size={30} width={2}/>
+              </div>}
 
-              <span className="text-sm p-2 dark:text-white text-black italic">{typingIndicator}</span>
+              {/* Render chat messages  */}
+              {Object?.keys(groupedMessages)?.reverse().map((date) => (
+                <div key={date}>
+                  <p className="my-3 text-sm text-center text-gray-500">{format(new Date(date), 'MMMM dd, yyyy')}</p>
+                  {...[...groupedMessages[date]]?.reverse().map((msg:Message) => (
+                    <MessageCard key={msg?.id} data={msg as Message} />
+                  ))}
+                </div>
+              ))}
+
+              {/* Message Loading State  */}
+              { isLoading && 
+                <div className="flex justify-center items-center h-full">
+                    <Loading size={80} width={1}/>
+                </div>
+              }
+
+              {/* Typing Indicator  */}
+             {typingIndicator && <span className="text-xs p-2 dark:text-white text-black">{typingIndicator}</span> }
               <div ref={messagesEndRef}/>
             </div>
 
-            <div className="mx-12 message-input bg-slate-200 rounded-xl px-2 dark:bg-[#212121]">
+
+            {/* Textarea for message typing  */}
+            <div className="input-container mx-8 sm:mx-20 message-input bg-white rounded-xl px-2 dark:bg-dark-secondary">
               <form onSubmit={handleSendMessage}>
                 <div className="flex sm:min-h-[56px] items-center">
                   <div className="w-full flex gap-4 items-center justify-between">
-                    <div className="w-full px-3 flex items-center rounded-xl ">
-                      <div className="w-[97%]">
-                        <textarea rows={2}
-                          required={true}
-                          onChange={handleMessageContentOnChange}
-                          // onChange={(e) => setMessageContent(e.target.value)}
-                          className="w-full bg-transparent resize-none flex px-1 text-sm placeholder:text-gray-600 dark:placeholder:text-white/70 focus:outline-none"
-                          placeholder="Message!"
-                          value={messageContent}
-                        ></textarea>
+                    <div className="w-full px-3 flex items-center rounded-xl gap-4">
+                      <div className="w-[94%]">
+                          <textarea rows={2}
+                            required={true}
+                            onChange={handleMessageContentOnChange}
+                            className="no-scrollbar w-full bg-transparent resize-none flex px-1 text-sm placeholder:text-gray-600 dark:placeholder:text-white/70 focus:outline-none"
+                            placeholder="Message!"
+                            value={messageContent}
+                            id="message"
+                            name="message"
+                          ></textarea>
+                      </div>
+
+                      <div className="shown-selected-image max-w-[3%]">
+                        {imageURL &&(
+                            <Image
+                              priority={false}
+                              className="w-5 h-5 rounded-md"
+                              src={imageURL}
+                              alt="chat-pciture"
+                              height={30}
+                              width={30}
+                            />
+                          )}
                       </div>
 
                       <div className="w-[3%]">
                           <ImagePlus onClick={handleSelectImage} size={20} className="dark:text-gray-200 text-gray-600 cursor-pointer"/>
                       </div> 
-
                     </div>
-                    <button
-                      disabled={!messageContent}
+                    {/* Sending Button Start */}
+                    <SendButton messageContent={messageContent} isMessageSending={isMessageSending}/>
+
+                    {/* <button
+                      disabled={!messageContent?.length}
                       type="submit"
                       className=" p-2 rounded-full cursor-pointer"
                     >
-                      {isMessageSending ? <Loading size={24}/> : <SendHorizontal className="text-[#3290EC] text-[1.6rem]" />}
+                      {isMessageSending ? <Loading size={24} width={2}/> : <SendHorizontal className="text-[#3290EC] text-[1.6rem]" />}
                       
-                    </button>
+                    </button> */}
+
+                    {/* Sending Button End */}
                   </div>
                 </div>
               </form>
@@ -445,8 +511,8 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
           </div>
 
           {isUserInfoContainerActive &&
-            <div className="user-info-container sidebar w-2/3 dark:bg-[#212121]">
-              <UserProfileContainer handleUserInfoContainer={handleUserInfoContainer} user={recipientUser as User}/>
+            <div className="transition duration-700 ease-in user-info-container sidebar w-2/3 bg-white dark:bg-black/70">
+              <UserProfileContainer handleUserInfoContainer={handleUserInfoContainer as React.FC} user={recipientUser as User}/>
             </div>
           }
 
@@ -454,11 +520,12 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
         )}
       </div>
 
+      
     </div>
 
     {/* Logout Page  */}
     {isLogoutPageOpen && 
-    <div className="w-full h-full bg-[#262626] fixed top-0 left-0 flex justify-center items-center">
+    <div className="w-full h-full backdrop-blur-md fixed top-0 left-0 flex justify-center items-center">
       <Logout handleLogout = {handleLogout} handleLogoutPageOpenState={handleLogoutPageOpenState}/>
     </div>
     }
@@ -477,3 +544,5 @@ export const sendMessageFn = async (payload:SendMessageInput) => {
        return null;
     }
 };
+
+

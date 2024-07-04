@@ -2,11 +2,55 @@
 const nextConfig = {
     reactStrictMode: true,
     images: {
-        // domains: ["i.pinimg.com" , "cdn.statusqueen.com" , "images.unsplash.com"]
         remotePatterns: [
           {
             protocol: 'https',
             hostname: 'i.pinimg.com',
+            pathname: '**',
+          },
+          {
+            protocol: 'https',
+            hostname: 'cdn.i-scmp.com',
+            pathname: '**',
+          },
+          {
+            protocol: 'https',
+            hostname: 'content.tupaki.com',
+            pathname: '**',
+          },
+          {
+            protocol: 'https',
+            hostname: 'm.media-amazon.com',
+            pathname: '**',
+          },
+          {
+            protocol: 'https',
+            hostname: 'englishtribuneimages.blob.core.windows.net',
+            pathname: '**',
+          },
+          {
+            protocol: 'https',
+            hostname: 'imgeng.jagran.com',
+            pathname: '**',
+          },
+          {
+            protocol: 'https',
+            hostname: 'www.thestatesman.com',
+            pathname: '**',
+          },
+          {
+            protocol: 'https',
+            hostname: 'instagram.fknu1-3.fna.fbcdn.net',
+            pathname: '**',
+          },
+          {
+            protocol: 'https',
+            hostname: 'assets.vogue.in',
+            pathname: '**',
+          },
+          {
+            protocol: 'https',
+            hostname: 'pin.it',
             pathname: '**',
           },
           {
@@ -34,7 +78,12 @@ const nextConfig = {
             hostname: 'priyanshu-quicky-dev.s3.ap-south-1.amazonaws.com',
             pathname: '**',
           },
-        ]
+          {
+            protocol: 'https',
+            hostname: 'r1.ilikewallpaper.net',
+            pathname: '**',
+          },
+        ]  
       },
 };
 

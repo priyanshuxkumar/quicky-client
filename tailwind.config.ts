@@ -1,6 +1,4 @@
-import { url } from "inspector"
 import type { Config } from "tailwindcss"
-import ChatBackground from "./public/ChatBackground.png"
 
 const config = {
   darkMode: ["class"],
@@ -20,6 +18,15 @@ const config = {
       },
     },
     extend: {
+      backgroundColor: {
+        'primary': '#F5F8FA',
+        'dark-primary-bg' :'#0C0F14',
+        'dark-secondary': '#25282D',
+        'accent-color': '#007AFF'
+      },
+      transitionDuration: {
+        '5000': '5000ms'
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

@@ -13,3 +13,13 @@ export const sendMessageMutation = graphql(`
         }
     }
 `)
+
+export const updateMsgSeenStatusMutation = graphql(`
+    #graphql
+    mutation UpdateMsgSeenStatus($chatId:String!){
+        updateMsgSeenStatus(chatId: $chatId){
+            success
+            message
+        }
+    }
+`)

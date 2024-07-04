@@ -1,8 +1,6 @@
-"use client";
-
-const Logout = ({handleLogout , handleLogoutPageOpenState}) => {
+const Logout = ({handleLogout , handleLogoutPageOpenState}: {handleLogout: any ,  handleLogoutPageOpenState:any}) => { //Fix later fn type
   return (
-    <div className="w-1/4 rounded-2xl py-8 px-8 bg-white dark:bg-black/80 z-50">
+    <div className="w-1/4 rounded-2xl py-8 px-8 bg-white dark:bg-dark-primary-bg z-50 border-[0.2px] border-gray-300 dark:border-gray-600">
       <div className="my-4">
         <p className="font-semibold text-2xl  text-black dark:text-white">
           Logout of Quicky?
@@ -12,7 +10,7 @@ const Logout = ({handleLogout , handleLogoutPageOpenState}) => {
       <div onClick={handleLogout} className="mt-5   cursor-pointer rounded-full border bg-white border-black px-3 py-3 text-sm font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black">
         <p className="text-center">Logout</p>
       </div>
-      <div onClick={handleLogoutPageOpenState} className="my-3  cursor-pointer rounded-full border border-black dark:border-white px-3 py-3 text-sm font-semibold text-black dark:text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black">
+      <div onClick={handleLogoutPageOpenState} className="my-3 cursor-pointer rounded-full border border-black dark:border-white px-3 py-3 text-sm font-semibold text-black dark:text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black">
         <p className="text-center">Cancel</p>
       </div>
     </div>

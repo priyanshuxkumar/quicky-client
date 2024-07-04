@@ -6,8 +6,11 @@ import { getOtherUserInfoOnChat } from '@/config/ChatLogic'
 import Image from "next/image";
 import { getTimeAgoString } from '@/config/TimeServices'
 import { useChatContext } from '@/context/ChatContext'
-import { useRouter } from 'next/navigation';
 import { Dot } from 'lucide-react';
+import { graphqlClient } from '../../../clients/api';
+import { updateMsgSeenStatusMutation } from '../../../graphql/mutation/chat';
+import { useCallback, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 
 
@@ -17,37 +20,51 @@ interface ChatCardProps {
 };
 
 const ChatCard : React.FC<ChatCardProps> = ({ data , onClick}) => {
-
   //Change selected Chat Background Color
-  const {selectedChatId , setRecipientUser} = useChatContext()
+  const {selectedChatId , setRecipientUser } = useChatContext()
 
-  const router = useRouter()  
-
+  //Current user
   const {user} = useCurrentUser();
 
   //getting second user info from chat
   const secondUserInfoOnChat = getOtherUserInfoOnChat(user?.id , data.users)
 
+  //state of recent message seen/unseen
+  const [isMsgSeen , setIsMsgSeen] =  useState<boolean | null | undefined >(data.messages && data?.messages[0]?.isSeen);
 
+  //state of recent message senderid == current user id
+  const [senderId , setSenderId] = useState<boolean | null | undefined >(data.messages && data.messages[0]?.senderId == user?.id)
+
+  //Chat click fn
   const handleClick = () => {
     onClick(data.id);
-    setRecipientUser(secondUserInfoOnChat)      
-    // router.push(`/chats/u/${secondUserInfoOnChat.username}` , {scroll:false})
+    setRecipientUser(secondUserInfoOnChat) 
+    //Updating status of message seen 
+    if(isMsgSeen === false && senderId == false) {
+      updateMsgSeenStatusFn(data?.id)
+      setIsMsgSeen(true)
+    }  
   };
 
-  //Getting time of last message
-  const createdAt = new Date(Number(data?.messages[0]?.createdAt)); 
+  //Fetching time of last message
+  const createdAt = new Date(Number(data.messages && data?.messages[0]?.createdAt)); 
   const timeOfLastMessageOnChat = getTimeAgoString(createdAt);
 
+  //Clicking on image and navigate to story page if story exists
+  const router = useRouter()
+  const handleImageClickToNavStory = useCallback(() => {
+    router.replace(`/stories/${secondUserInfoOnChat?.username}/${secondUserInfoOnChat?.id}`)
+  },[secondUserInfoOnChat]);
   return (
     <>
-    <div onClick={handleClick} className={`${data.id == selectedChatId && 'bg-slate-100 dark:bg-black '} transition duration-500 hell px-7 py-2 my-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-black`}>
-        <div className="flex gap-4 items-center">
-            <div className="w-14 h-14 flex flex-col justify-center relative">
+    <div  className={`${data.id == selectedChatId && 'bg-primary dark:bg-dark-secondary '} transition duration-500 px-4 py-2 my-2 cursor-pointer hover:bg-primary dark:hover:bg-dark-secondary`}>
+        <div className="flex gap-3 items-center">
+            <div className="min-w-14 min-h-14 flex flex-col justify-center relative">
                 {secondUserInfoOnChat && secondUserInfoOnChat?.avatar &&
                     <Image
+                        onClick={handleImageClickToNavStory}
                         priority= {false}
-                        className="inline-block h-12 w-12 rounded-xl"
+                        className="inline-block h-12 w-12 rounded-full ring-1 ring-gray-300 dark:ring-gray-600 ring-offset-2 dark:ring-offset-black"
                         src={secondUserInfoOnChat?.avatar}
                         alt="avatar"
                         height={30}
@@ -58,21 +75,24 @@ const ChatCard : React.FC<ChatCardProps> = ({ data , onClick}) => {
                   secondUserInfoOnChat && secondUserInfoOnChat?.isActive && <span className="absolute bottom-1 right-0 block h-2.5 w-2.5 rounded-full bg-green-600 ring-2 ring-white"></span>
                 }
             </div>
-            <div className="w-full">
-                <div className="flex gap-1">
-                    <h5 className="text-[15px] font-medium dark:text-white"> {secondUserInfoOnChat?.firstname} </h5>
-                    <h5 className="text-[15px] font-medium dark:text-white">{secondUserInfoOnChat?.lastname}</h5>
+            <div onClick={handleClick} className="w-full overflow-hidden">
+                <div className="flex justify-between  items-center gap-1">
+                  <div className='flex gap-1'>
+                    <h5 className="text-[15px] font-semibold dark:text-white"> {secondUserInfoOnChat?.firstname} </h5>
+                    <h5 className="text-[15px] font-semibold dark:text-white">{secondUserInfoOnChat?.lastname}</h5>
+                  </div>
+                    <div>
+                      <span className='text-xs font-medium dark:text-white/70 tracking-wide'>{timeOfLastMessageOnChat}</span>
+                    </div>
                 </div>
 
-                <div className='flex justify-between items-center h-5'>
-                    <p className='text-sm text-gray-600 dark:text-white/70'>{ data && data.messages && data.messages[0]?.content  || ''}</p>
+                <div className='flex items-center h-5 w-full'>
+                    {/* Lastest Message on Chat */}
+                    <p className={`${data.messages && isMsgSeen == false && senderId == false &&  'dark:text-white text-black'} text-sm w-11/12 font-medium text-gray-600  dark:text-white/70 truncate`}>{senderId == true && <span className='font-semibold text-black dark:text-white'>You:</span>} { data && data.messages && data.messages[0]?.content}</p>
                    
-                    <div className='flex justify-end items-center dark:text-white'>
+                    <div className='h-full flex items-center'>
                       {/* Unread message Icon */}
-                      <Dot size={40} className='text-[#3290EC]'/> 
-                       {data?.messages[0]?.content && 
-                        <span className='text-xs dark:text-white/70'>{timeOfLastMessageOnChat}</span>
-                       }
+                      {isMsgSeen == false && senderId == false && data.messages && data?.messages[0]?.content && <Dot size={40} className='text-[#3290EC]'/>}
                     </div>
                 </div>
 
@@ -83,6 +103,16 @@ const ChatCard : React.FC<ChatCardProps> = ({ data , onClick}) => {
     </>
 
   )
-}
+};
 
 export default ChatCard;
+
+const updateMsgSeenStatusFn = async(chatId :string) => {
+   try {
+     const response = await graphqlClient.request(updateMsgSeenStatusMutation , {chatId})
+     if(response.updateMsgSeenStatus.success == true) return
+   } catch (error) {
+      console.error("Error occured while update message seen status ", error);
+      return null;
+   }
+}

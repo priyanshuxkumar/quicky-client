@@ -20,12 +20,12 @@ const Setting = () => {
             </div>
           </div>
 
-          <div className="mt-4 bg-slate-100 dark:bg-[#303030] py-3 px-4 rounded-xl  transition-all">
+          <div className="my-4 mx-3 bg-primary dark:bg-[#303030] py-3 px-4 rounded-xl  transition-all">
             <div className="flex gap-3 items-center justify-between">
               <div>
                 <span className="text-black font-medium dark:text-white">Dark Mode</span>
               </div>
-            <ThemeSwitcher/>  
+              <ThemeSwitcher/>  
             </div>
           </div>
         </div>

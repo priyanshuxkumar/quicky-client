@@ -1,9 +1,10 @@
 import { AtSign, X } from "lucide-react";
 
 import Image from "next/image";
+import { User } from "../../../gql/graphql";
 
 //Recipient User Info Container
-const UserProfileContainer = ({ handleUserInfoContainer , user }) => {
+const UserProfileContainer = ({ handleUserInfoContainer , user } : {handleUserInfoContainer: React.FC , user: User}) => {
   return (
     <div className="right-container">
       <div className="user-info">
@@ -26,7 +27,7 @@ const UserProfileContainer = ({ handleUserInfoContainer , user }) => {
             {user && user.avatar && (
               <Image
                 priority={false}
-                className="h-24 w-24 rounded-full object-cover"
+                className="h-24 w-24 rounded-full object-cover ring-2 ring-accent-color ring-offset-2 dark:ring-offset-black"
                 src={user?.avatar}
                 alt="user_avatar"
                 width={30}
@@ -36,7 +37,7 @@ const UserProfileContainer = ({ handleUserInfoContainer , user }) => {
           </div>
           <div>
             <p className="mt-3 text-center text-lg font-semibold text-black dark:text-white ">
-              {user?.firstname}
+              {user?.firstname} {""} {user?.lastname}
             </p>
             <p className="text-center text-base text-gray-600 dark:text-slate-200">Online</p>
           </div>

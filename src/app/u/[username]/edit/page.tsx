@@ -146,6 +146,7 @@ const ProfileEdit = () => {
           <div className="flex justify-center relative">
             {user && user.avatar && (
               <Image
+                priority={true}
                 className="h-32 w-32 rounded-full object-cover opacity-50 blur-sm"
                 src={user?.avatar}
                 alt="user avatar"

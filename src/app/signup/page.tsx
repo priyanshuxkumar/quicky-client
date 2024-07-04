@@ -13,7 +13,7 @@ import { graphqlClient } from "../../../clients/api";
 import { checkEmailIsValidQuery, checkUsernameIsValidQuery } from "../../../graphql/query/user";
 import { sendOTPVerificationEmailMutation, verifyOTPMutation } from "../../../graphql/mutation/user";
 import EmailPage from "./verify/[username]/page";
-import Loading from "../loading";
+import Loading from "../../components/loading";
 
 const Page = () => {
     //Checking if the user is already logged in or not
@@ -142,7 +142,7 @@ const Page = () => {
     <>
     {currentStep === 1 && 
     (<section>
-      <div className="dark:bg-black h-screen flex items-center justify-center px-4 py-4 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
+      <div className="dark:bg-dark-primary-bg h-screen flex items-center justify-center px-4 py-4 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
         <div className="xl:mx-auto xl:w-full xl:max-w-sm 2xl:max-w-md">
           <div className="mb-4 flex justify-center">
             <h1 className="font-bold text-4xl">Quicky</h1>
@@ -245,7 +245,7 @@ const Page = () => {
                   onClick={handleOTPVerificationEmailSend}
                   className={`inline-flex h-10 w-full items-center justify-center rounded-md bg-black dark:text-black dark:bg-white px-3.5 py-2.5 font-semibold leading-7 text-white hover:bg-black/80 cursor-pointer`}
                 >
-                  {isSubmitting ? (<> <Loading size={28}/>  Please wait </>): ('Signup')}                  
+                  {isSubmitting ? (<> <Loading size={28} width={2}/>  Please wait </>): ('Signup')}                  
                 </button>
               </div>
             </div>

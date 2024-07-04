@@ -12,8 +12,6 @@ import { useChatContext } from "@/context/ChatContext";
 import socket from "@/lib/socket";
 
 
-
-
 export const useRegisterUser = () => {
     const queryClient = useQueryClient();
 
@@ -68,40 +66,44 @@ export const useCurrentUser =  () => {
     const query = useQuery({
         queryKey: ["current-user"],
         queryFn: () => graphqlClient.request(getCurrentUserQuery),
+        staleTime: 5 * 60 * 1000, // Cache data for 5 minutes
+        refetchOnWindowFocus: false, // Disable refetching on window focus
     })
+    
     return { ...query, user: query.data?.getCurrentUser};
 };
 
 export const useFetchAllChats = () => {
   const query = useQuery({
       queryKey: ["all-chats"],
-
       queryFn: () => graphqlClient.request(fetchAllChatsQuery),
-  })
+      staleTime: 5 * 60 * 1000, // Cache data for 5 minutes
+      refetchOnWindowFocus: false, // Disable refetching on window focus
+  });
+  
   return { ...query, chats: query.data?.fetchAllChats};
 }
 
 
 
-export const useFetchChatMessages = (chatId?: string , recipientId?: string) => {
+export const useFetchChatMessages = (chatId?: string , recipientId?: string , limit?: number , offset?:number) => {
+
   const { selectedChatId }: any = useChatContext();
   
     const query = useQuery({
-      queryKey: ['chat-messages', chatId , recipientId], // Unique query key for caching
+      queryKey: ['chat-messages', chatId , recipientId , offset], // Unique query key for caching
       queryFn: () => {
         if (chatId || recipientId) {
           socket.emit("join chat", selectedChatId);
-          return graphqlClient.request(fetchChatMessagesQuery, { chatId : chatId, recipientId : recipientId});
-          
+          return graphqlClient.request(fetchChatMessagesQuery, { chatId : chatId, recipientId : recipientId , limit , offset});
         }else {
           return { fetchAllMessages: [] };
         }
       },
       enabled: !!chatId,
+      refetchOnWindowFocus: false,
   });
-  return {
-      chatMessages: query.data?.fetchAllMessages,
-  };
+  return {...query, chatMessages: query.data?.fetchAllMessages};
 };
 
 export const useSendMessage = () => {

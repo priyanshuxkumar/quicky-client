@@ -13,8 +13,8 @@ interface ChatContextType {
     recipientUser: User | null;
     setRecipientUser: (User: User) => void;
 
-    activeUsers: {}
-    setActiveUsers: (userId: string) => void;
+    storyUserChatId: string | null;
+    setStoryUserChatId: (chatId: string) => void;
 }
 
 const ChatContext = createContext<ChatContextType | null>(null);
@@ -35,12 +35,11 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
     const [isChatBoxOpen, setIsChatBoxOpen] = useState<boolean>(false);
     const [recipientUser, setRecipientUser] = useState<User | null>(null);
-    const [activeUsers, setActiveUsers] = useState({});
+    const [storyUserChatId, setStoryUserChatId] = useState<string | null>(null);
+
     
-
-
     return (
-        <ChatContext.Provider value={{ selectedChatId, setSelectedChatId , isChatBoxOpen, setIsChatBoxOpen , recipientUser , setRecipientUser , activeUsers , setActiveUsers}}>
+        <ChatContext.Provider value={{ selectedChatId, setSelectedChatId , isChatBoxOpen, setIsChatBoxOpen , recipientUser , setRecipientUser , storyUserChatId , setStoryUserChatId}}>
             {children}
         </ChatContext.Provider>
     );
