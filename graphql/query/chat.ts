@@ -14,6 +14,7 @@ export const fetchChatMessagesQuery = graphql(`
       story {
         mediaUrl
       }
+      shareMediaUrl
     }
   }
 `);
@@ -48,4 +49,15 @@ export const getSignedUrlOfChatQuery = graphql(`
   query GetSignedUrlOfChat( $imageName: String! $imageType: String!) {
     getSignedUrlOfChat(imageName: $imageName imageType: $imageType)
   }
+`)
+
+export const fetchSharedMediaOfChatQuery = graphql(`
+  #graphql
+  query FetchSharedMediaOfChat($chatId:String!){
+    fetchSharedMediaOfChat(chatId:$chatId){
+      id
+      shareMediaUrl
+    }
+  }
+
 `)

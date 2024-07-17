@@ -41,6 +41,7 @@ import React from "react";
 import { groupMessagesByDate } from "@/config/TimeServices";
 import SendButton from "../Button";
 import { sendMessage } from "@/helpers/sendMessage";
+import PopupSendMedia from "../PopupSendMedia";
 
 interface QuickySidebarButton {
   title: string;
@@ -95,6 +96,7 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
   const pathname = usePathname();
   
   const [isMessageSending , setIsMessageSending] = useState(false);
+  // const [isMediaSending , setIsMediaSending] = useState(false);
 
   //Message Code Starts Here
   const { selectedChatId, isChatBoxOpen, recipientUser , setIsChatBoxOpen}: any = useChatContext();
@@ -117,6 +119,15 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
 
   //Send Image On chat as message
   const [imageURL , setImageURL] = useState('')
+  const [isSendMediaPopupActive , setIsSendMediaPopupActive ] = useState(false);
+  const [selectedMediaTempURL, setSelectedMediaTempURL] = useState(null);
+
+  const handleSendMediaPopup = () => {
+    setIsSendMediaPopupActive(!isSendMediaPopupActive)
+    if(isSendMediaPopupActive){
+      setSelectedMediaTempURL(null)
+    }
+  };
 
   //Get image file for sending
   const handleInputChangeFile = useCallback((input: HTMLInputElement)=> {
@@ -124,8 +135,13 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
         event.preventDefault()
 
         const file:File | undefined | null |string = input.files?.item(0)
-        if(!file)return
-        console.log("quicky file" , file)
+        if (!file)return
+        if (file) {
+          const tempUrl = URL.createObjectURL(file);
+          setSelectedMediaTempURL(tempUrl);
+          setIsSendMediaPopupActive(true)
+        };
+
         const {getSignedUrlOfChat} = await graphqlClient.request( getSignedUrlOfChatQuery,{ 
           imageName: file.name,
           imageType: file.type
@@ -133,13 +149,11 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
         );
 
         if(getSignedUrlOfChat){
-          toast.loading("Uploading Image...", { id: "1" });
           await axios.put(getSignedUrlOfChat , file , {
             headers: {
               'Content-Type': file.type
             }
           })
-          toast.success('Send successfully' , {id: '1'})
           const url = new URL(getSignedUrlOfChat)
           const myFilePath = `${url.origin}${url.pathname}`
           setImageURL(myFilePath)
@@ -152,7 +166,7 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
   const handleSelectImage = useCallback(()=>{
       const input = document.createElement('input')
       input.setAttribute('type' , 'file')
-      input.setAttribute('accept' , 'image/*')
+      input.setAttribute('accept' , ".jpg, .jpeg, .png");
 
       const handlerFn = handleInputChangeFile(input)
       input.addEventListener('change' , handlerFn)
@@ -252,8 +266,13 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
       selectedChatId, 
       recipientUser, 
       setIsMessageSending, 
-      setMessageContent 
+      setMessageContent, 
+      shareMediaUrl: imageURL
     });
+    if(isSendMediaPopupActive){
+      handleSendMediaPopup()
+      toast.success('Send successfully' , {id: '1'})
+    }
   };
   // const handleSendMessage = async(e: { preventDefault: () => void }) => {
   //   setIsMessageSending(true)
@@ -474,25 +493,14 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
                           ></textarea>
                       </div>
 
-                      <div className="shown-selected-image max-w-[3%]">
-                        {imageURL &&(
-                            <Image
-                              priority={false}
-                              className="w-5 h-5 rounded-md"
-                              src={imageURL}
-                              alt="chat-pciture"
-                              height={30}
-                              width={30}
-                            />
-                          )}
-                      </div>
 
+                      {/* Select Media for send on chat  */}
                       <div className="w-[3%]">
                           <ImagePlus onClick={handleSelectImage} size={20} className="dark:text-gray-200 text-gray-600 cursor-pointer"/>
                       </div> 
                     </div>
                     {/* Sending Button Start */}
-                    <SendButton messageContent={messageContent} isMessageSending={isMessageSending}/>
+                      <SendButton messageContent={messageContent} isMessageSending={isMessageSending}/>
 
                     {/* <button
                       disabled={!messageContent?.length}
@@ -504,6 +512,7 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
                     </button> */}
 
                     {/* Sending Button End */}
+
                   </div>
                 </div>
               </form>
@@ -511,7 +520,7 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
           </div>
 
           {isUserInfoContainerActive &&
-            <div className="transition duration-700 ease-in user-info-container sidebar w-2/3 bg-white dark:bg-black/70">
+            <div className="transition duration-700 ease-in user-info-container sidebar w-2/3 bg-white dark:bg-dark-primary-bg">
               <UserProfileContainer handleUserInfoContainer={handleUserInfoContainer as React.FC} user={recipientUser as User}/>
             </div>
           }
@@ -525,10 +534,16 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
 
     {/* Logout Page  */}
     {isLogoutPageOpen && 
-    <div className="w-full h-full backdrop-blur-md fixed top-0 left-0 flex justify-center items-center">
+    <div className="w-full h-full backdrop-blur-sm fixed top-0 left-0 flex justify-center items-center">
       <Logout handleLogout = {handleLogout} handleLogoutPageOpenState={handleLogoutPageOpenState}/>
     </div>
     }
+
+    {/* Send Media Popup Container  */}
+    {selectedMediaTempURL && isSendMediaPopupActive &&
+    <div className="w-full h-full backdrop-blur-md fixed top-0 left-0 flex justify-center items-center">
+      <PopupSendMedia handleSendMessage={handleSendMessage} handleSendMediaPopup={handleSendMediaPopup} mediaUrl={selectedMediaTempURL}/>
+    </div>}
     </>
   );
 };

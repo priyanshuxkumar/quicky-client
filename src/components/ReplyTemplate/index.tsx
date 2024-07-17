@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { ArrowDownLeft } from "lucide-react";
 
+// replied stories render compo. 
 const ReplyTemplate = (mediaUrl: any) => {
   return (
     <>
@@ -14,6 +15,7 @@ const ReplyTemplate = (mediaUrl: any) => {
         </span>
       </div>
       <div>
+        
         <Image
           priority={false}
           className="inline-block w-24 h-fit  rounded-xl object-cover"

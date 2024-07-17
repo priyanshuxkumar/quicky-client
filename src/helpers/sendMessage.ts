@@ -2,10 +2,10 @@ import { sendMessageFn } from "@/components/Layout/QuickyLayout";
 import socket from "@/lib/socket";
 import toast from "react-hot-toast";
 
-export const sendMessage = async ({ messageContent, selectedChatId = null, recipientUser, setIsMessageSending, setMessageContent , storyId = null }:any) => {
+export const sendMessage = async ({ messageContent, selectedChatId = null, recipientUser, setIsMessageSending, setMessageContent , storyId = null , shareMediaUrl=null}:any) => {
     setIsMessageSending(true);
   
-    if (messageContent.trim() === '') {
+    if (messageContent.trim() === '' && !shareMediaUrl) {
       toast.error('Message cannot be empty');
       setIsMessageSending(false);
       return;
@@ -16,6 +16,7 @@ export const sendMessage = async ({ messageContent, selectedChatId = null, recip
         chatId: selectedChatId || null,
         content: messageContent,
         recipientId: recipientUser?.id,
+        shareMediaUrl,
         storyId: storyId
       };
       const response = await sendMessageFn(variables);

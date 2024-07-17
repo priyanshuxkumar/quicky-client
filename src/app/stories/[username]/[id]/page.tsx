@@ -5,7 +5,7 @@ import {X, ChevronLeft , ChevronRight, EllipsisVertical,CirclePlay , CirclePause
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Loading from "@/components/loading";
 import { getTimeAgoString } from "@/config/TimeServices";
 import { useFetchSingleUserStories } from "../../../../../hooks/story";
@@ -48,10 +48,11 @@ const StoryPage = () => {
     }
   },[currentStoryIndex]);
   
+
   const handleNextStory = useCallback(() => {
-    if (userStories && currentStoryIndex < userStories.length - 1) {
+    if (userStories && userStories.length - 1 > currentStoryIndex) {
       setCurrentStoryIndex(currentStoryIndex + 1);
-    } else if (userStories && currentStoryIndex >= userStories.length - 1){
+    } else if (userStories && userStories.length - 1 <= currentStoryIndex ){
       handleCloseStoryPage();
     }
   },[currentStoryIndex , userStories]);
@@ -116,6 +117,12 @@ const StoryPage = () => {
   useEffect(() => {
     setProgress(0); 
   }, [currentStoryIndex]);
+
+  useEffect(() => {
+    if(storyReplyContent){
+      setIsPaused(true)
+    }
+  }, [isPaused , storyReplyContent]);
 
 
   const handlePlayPauseStory = useCallback(() => {
@@ -188,11 +195,11 @@ const StoryPage = () => {
           {currentStory?.user?.id !== user?.id && 
           <div className="absolute bottom-4 left-0 w-full">
             <form onSubmit={handleSendStoryReplyToMsg} className="w-full flex justify-center">
-              <label htmlFor="storyreply" className="w-11/12 border rounded-full px-4 py-1 flex justify-between items-center">
+              <label htmlFor="storyreply" className="w-11/12 border dark:border-white rounded-full px-4 py-1 flex justify-between items-center">
                 <input
                   onChange={(e)=> setStoryReplyContent(e.target.value)}
                   name="storyreply"
-                  className=" placeholder:text-white text-white w-11/12 text-sm  focus:border-none focus:outline-none bg-transparent"
+                  className=" placeholder:text-white text-white w-11/12 text-sm focus:border-none focus:outline-none bg-transparent"
                   type="storyreply"
                   placeholder='Reply'
                   autoComplete="off"
@@ -206,7 +213,7 @@ const StoryPage = () => {
           }
           {/* //Reply Input  End here */}
 
-          <div onClick={handleNextStory} className='w-1/3 sm:w-fit sm:flex navigation forward-button absolute flex-col justify-center h-screen right-0 top-20 sm:-right-12 sm:top-0 text-white cursor-pointer'>
+          <div onClick={handleNextStory} className='w-1/3 h-[70%] sm:w-fit sm:flex navigation forward-button absolute flex-col justify-center right-0 top-20 sm:-right-12 sm:top-0 text-white cursor-pointer'>
             {userStories && userStories?.length > 1 && currentStoryIndex < userStories.length -1  && <ChevronRight size={28} className="hidden sm:inline-block bg-gray-700 rounded-full hover:bg-white text-black"/>}
           </div>
           

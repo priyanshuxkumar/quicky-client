@@ -39,6 +39,8 @@ const ChatCard : React.FC<ChatCardProps> = ({ data , onClick}) => {
   const handleClick = () => {
     onClick(data.id);
     setRecipientUser(secondUserInfoOnChat) 
+    router.push(`#${secondUserInfoOnChat.username}`)
+    
     //Updating status of message seen 
     if(isMsgSeen === false && senderId == false) {
       updateMsgSeenStatusFn(data?.id)
@@ -54,7 +56,8 @@ const ChatCard : React.FC<ChatCardProps> = ({ data , onClick}) => {
   const router = useRouter()
   const handleImageClickToNavStory = useCallback(() => {
     router.replace(`/stories/${secondUserInfoOnChat?.username}/${secondUserInfoOnChat?.id}`)
-  },[secondUserInfoOnChat]);
+  },[secondUserInfoOnChat , router]);
+
   return (
     <>
     <div  className={`${data.id == selectedChatId && 'bg-primary dark:bg-dark-secondary '} transition duration-500 px-4 py-2 my-2 cursor-pointer hover:bg-primary dark:hover:bg-dark-secondary`}>
@@ -88,11 +91,11 @@ const ChatCard : React.FC<ChatCardProps> = ({ data , onClick}) => {
 
                 <div className='flex items-center h-5 w-full'>
                     {/* Lastest Message on Chat */}
-                    <p className={`${data.messages && isMsgSeen == false && senderId == false &&  'dark:text-white text-black'} text-sm w-11/12 font-medium text-gray-600  dark:text-white/70 truncate`}>{senderId == true && <span className='font-semibold text-black dark:text-white'>You:</span>} { data && data.messages && data.messages[0]?.content}</p>
+                    <p className={`${data.messages && isMsgSeen == false && senderId == false &&  'dark:text-white text-black'} text-sm w-11/12 font-medium text-gray-600  dark:text-white/70 truncate`}>{senderId == true && <span className='font-semibold text-black dark:text-white'>You:</span>} {data.messages && (!data.messages[0]?.content  ? 'Sent an attachment' : data.messages[0]?.content)}</p>
                    
                     <div className='h-full flex items-center'>
                       {/* Unread message Icon */}
-                      {isMsgSeen == false && senderId == false && data.messages && data?.messages[0]?.content && <Dot size={40} className='text-[#3290EC]'/>}
+                      {isMsgSeen == false && senderId == false && data.messages && data?.messages[0]?.content  && <Dot size={40} className='text-[#3290EC]'/>}
                     </div>
                 </div>
 

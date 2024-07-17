@@ -40,6 +40,11 @@ const nextConfig = {
           },
           {
             protocol: 'https',
+            hostname: 'images.news18.com',
+            pathname: '**',
+          },
+          {
+            protocol: 'https',
             hostname: 'instagram.fknu1-3.fna.fbcdn.net',
             pathname: '**',
           },
@@ -71,6 +76,11 @@ const nextConfig = {
           {
             protocol: 'https',
             hostname: 'www.freepik.com',
+            pathname: '**',
+          },
+          {
+            protocol: 'https',
+            hostname: '4kwallpapers.com',
             pathname: '**',
           },
           {

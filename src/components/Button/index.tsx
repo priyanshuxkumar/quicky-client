@@ -2,10 +2,10 @@ import React from "react";
 import Loading from "../loading";
 import { SendHorizontal } from "lucide-react";
 
-const SendButton = ({ messageContent, isMessageSending }: any) => {
+const SendButton = ({ messageContent, isMessageSending}: any) => {
   return (
     <button
-      disabled={!messageContent?.length}
+      // disabled={!messageContent?.length}
       type="submit"
       className=" p-2 rounded-full cursor-pointer"
     >

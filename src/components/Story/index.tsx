@@ -19,7 +19,7 @@ const Story = ({ storyUser , currentUserStory}: any) => {
   const { setStoryUserChatId } = useChatContext(); //get chatId of StoryUser for reply on msg
 
   const handleStoryClickFn = () => {
-    router.replace(`/stories/${storyUser?.username}/${storyUser?.id}`);
+    router.push(`/stories/${storyUser?.username}/${storyUser?.id}`);
     setStoryUserChatId(storyUser?.chatId); //assign chatId of storyUser
   };
 

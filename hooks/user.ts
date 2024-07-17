@@ -3,7 +3,7 @@ import { SendMessageInput, UserCreateInput, UserLoginInput } from "../gql/graphq
 import { loginUserMutation, registerUserMutation } from "../graphql/mutation/user"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { getCurrentUserQuery } from "../graphql/query/user";
-import { fetchAllChatsQuery, fetchChatMessagesQuery } from "../graphql/query/chat";
+import { fetchAllChatsQuery, fetchChatMessagesQuery, fetchSharedMediaOfChatQuery } from "../graphql/query/chat";
 
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
@@ -87,9 +87,7 @@ export const useFetchAllChats = () => {
 
 
 export const useFetchChatMessages = (chatId?: string , recipientId?: string , limit?: number , offset?:number) => {
-
   const { selectedChatId }: any = useChatContext();
-  
     const query = useQuery({
       queryKey: ['chat-messages', chatId , recipientId , offset], // Unique query key for caching
       queryFn: () => {
@@ -125,5 +123,24 @@ export const useSendMessage = () => {
       },
   })
   return mutation;
+};
+
+export const useFetchSharedMediaOfChat = () => {
+  const { selectedChatId }: any = useChatContext();
+  const query = useQuery({
+    queryKey: ['chat-media', selectedChatId], // Unique query key for caching
+    queryFn: () => {
+      if (selectedChatId) {
+        return graphqlClient.request(fetchSharedMediaOfChatQuery, {chatId : selectedChatId});
+      }
+      return null;
+    },
+    enabled: !!selectedChatId,
+    staleTime: 1 * 60 * 1000,
+    refetchOnWindowFocus: false, 
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+  });
+  return {...query, mediaOfChat: query?.data?.fetchSharedMediaOfChat};
 }
 

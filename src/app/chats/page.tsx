@@ -3,7 +3,7 @@
 import ChatCard from "@/components/ChatCard/index";
 import { QuickyLayout } from "@/components/Layout/QuickyLayout";
 import { useChatContext } from "@/context/ChatContext";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { getUserByUsernameQuery } from "../../../graphql/query/user";
