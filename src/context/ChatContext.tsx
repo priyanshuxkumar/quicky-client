@@ -32,6 +32,7 @@ interface ChatProviderProps {
 }
 
 export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
+    
     const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
     const [isChatBoxOpen, setIsChatBoxOpen] = useState<boolean>(false);
     const [recipientUser, setRecipientUser] = useState<User | null>(null);

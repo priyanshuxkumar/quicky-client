@@ -7,7 +7,6 @@ import {
   Bolt,
   MessageSquare,
   CirclePower,
-  SendHorizontal,
   Search,
   Phone,
   EllipsisVertical,
@@ -36,11 +35,11 @@ import Logout from "../Logout";
 import { getSignedUrlOfChatQuery } from "../../../graphql/query/chat";
 
 import socket from "@/lib/socket";
+
 import UserProfileContainer from "../UserProfileContainer";
 import React from "react";
 import { groupMessagesByDate } from "@/config/TimeServices";
 import SendButton from "../Button";
-import { sendMessage } from "@/helpers/sendMessage";
 import PopupSendMedia from "../PopupSendMedia";
 
 interface QuickySidebarButton {
@@ -94,6 +93,7 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
 
   //route
   const pathname = usePathname();
+
   
   const [isMessageSending , setIsMessageSending] = useState(false);
   // const [isMediaSending , setIsMediaSending] = useState(false);
@@ -112,7 +112,7 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
   // console.log(chatMessages)
 
   const [messageContent, setMessageContent] = useState('');
-  const [messages, setMessages] = useState<Message[] >([]);
+  // const [messages, setMessages] = useState<Message[] >([]);
   
   //Grouped Msg's -
   const [groupedMessages, setGroupedMessages] = useState<GroupedMessages>({});
@@ -120,12 +120,12 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
   //Send Image On chat as message
   const [imageURL , setImageURL] = useState('')
   const [isSendMediaPopupActive , setIsSendMediaPopupActive ] = useState(false);
-  const [selectedMediaTempURL, setSelectedMediaTempURL] = useState(null);
+  const [selectedMediaTempURL, setSelectedMediaTempURL] = useState<string>('');
 
   const handleSendMediaPopup = () => {
     setIsSendMediaPopupActive(!isSendMediaPopupActive)
     if(isSendMediaPopupActive){
-      setSelectedMediaTempURL(null)
+      setSelectedMediaTempURL('')
     }
   };
 
@@ -190,6 +190,7 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
       if (newMessage?.chatId != selectedChatId) {
         // TODO - Give Notification
       };
+      
       if (newMessage?.chatId === selectedChatId) {
         // Update groupedMessages with the new message
         setGroupedMessages((prevGroupedMessages: GroupedMessages) => {
@@ -259,49 +260,31 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
       },5000)
   };
 
-  const handleSendMessage = async (e:any) => {
+  // Socket IO of send Message
+  const handleSendMessage = (e:any) => {
+    setIsMessageSending(true)
     e.preventDefault();
-    await sendMessage({ 
-      messageContent, 
-      selectedChatId, 
-      recipientUser, 
-      setIsMessageSending, 
-      setMessageContent, 
-      shareMediaUrl: imageURL
-    });
-    if(isSendMediaPopupActive){
-      handleSendMediaPopup()
-      toast.success('Send successfully' , {id: '1'})
+    const messagePayload = {
+      content: messageContent,
+      chatId: selectedChatId,
+      senderId: user?.id,
+      recipientId: recipientUser.id,
+      shareMediaUrl: imageURL,
+      createdAt: Date.now()
+    };
+    socket.emit('sendMessage', messagePayload);
+    
+    if (isSendMediaPopupActive) {
+      handleSendMediaPopup();
+      toast.success('Send successfully', { id: '1' });
     }
+    
+    setIsMessageSending(false);
+    setMessageContent('');
   };
-  // const handleSendMessage = async(e: { preventDefault: () => void }) => {
-  //   setIsMessageSending(true)
-  //   e.preventDefault();
-  //   if (messageContent.trim() === '') {
-  //     toast.error('Message cannot be empty');
-  //     return;
-  //   }
-  //   try {
-  //     const variables = {
-  //       chatId: selectedChatId || null,
-  //       content: messageContent,
-  //       recipientId: recipientUser?.id,
-  //     };
-  //     const response = await sendMessageFn(variables)
-  //     if(response){
-  //       socket.emit("sendMessage", response);
-  //     }else{
-  //       toast.error("Error sending message");
-  //     }
-  //     setMessageContent("");
-  //     setIsMessageSending(false)
-  //   } catch (error) {
-  //     console.error("Error occured while login:", error);
-  //     setIsMessageSending(false)
-  //     setMessageContent('')
-  //   }
-  // };
 
+
+  
   //Handle Message Component Menu
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const handleMessageMenu = () => {
@@ -316,7 +299,7 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
 
   
 
-    //Scroll to bottom when chat willopen
+  //Scroll to bottom when chat willopen
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   // Scroll to bottom when new messages arrive
@@ -341,7 +324,7 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
      localStorage.removeItem("__token__");
      toast.success("Logout successfull...", { id: "2" });
      router.push("/");
-     setIsChatBoxOpen(false)
+     setIsChatBoxOpen(false);
    };
   return (
     <>
@@ -501,16 +484,6 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
                     </div>
                     {/* Sending Button Start */}
                       <SendButton messageContent={messageContent} isMessageSending={isMessageSending}/>
-
-                    {/* <button
-                      disabled={!messageContent?.length}
-                      type="submit"
-                      className=" p-2 rounded-full cursor-pointer"
-                    >
-                      {isMessageSending ? <Loading size={24} width={2}/> : <SendHorizontal className="text-[#3290EC] text-[1.6rem]" />}
-                      
-                    </button> */}
-
                     {/* Sending Button End */}
 
                   </div>

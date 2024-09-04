@@ -26,8 +26,6 @@ const MessagesRenderPage = () => {
   const { selectedChatId, isChatBoxOpen, recipientUser }: any = useChatContext();
   const openChat = useFetchChatMessages(selectedChatId);
 
-  // console.log("selectedChatId" , selectedChatId)
-
   const { mutate } = useSendMessage();
   const [message, setMessage] = useState("");
 
@@ -52,7 +50,7 @@ const MessagesRenderPage = () => {
   };
   return (
     <>
-    {/* <QuickyLayout> */}
+    
       <div className="sticky left-0 top-0 right-0">
         <div className="flex justify-between items-center border-gray-200 dark:border-gray-800 px-4 py-1 border-b-[1px] mx-4">
           <div className="flex gap-2 items-center">
@@ -122,7 +120,7 @@ const MessagesRenderPage = () => {
           </div>
         </form>
       </div>
-    {/* </QuickyLayout> */}
+    
     </>
 
 

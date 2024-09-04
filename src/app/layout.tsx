@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
-import { Inter, Noto_Sans} from "next/font/google";
+import { Inter, Noto_Sans } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
 const noto_sans = Noto_Sans({ subsets: ["latin"] });
-
 
 import { Toaster } from "react-hot-toast";
 

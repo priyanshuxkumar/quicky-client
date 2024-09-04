@@ -18,7 +18,7 @@ const documents = {
     "\n  #graphql\n  mutation CreateStory($mediaUrl: String!) {\n    createStory(mediaUrl: $mediaUrl) {\n      success\n      message\n    }\n  }\n": types.CreateStoryDocument,
     "\n  #graphql\n  mutation DeleteStory($storyId: String!) {\n    deleteStory(storyId: $storyId) {\n      success\n      message\n    }\n  }\n": types.DeleteStoryDocument,
     "\n  #graphql\n  mutation LoginUser($payload: UserLoginInput!) {\n    loginUser(payload: $payload) {\n      user {\n        firstname\n        lastname\n      }\n      token\n    }\n}\n": types.LoginUserDocument,
-    "\n    #graphql\n    mutation RegisterUser($payload: UserCreateInput!){\n      registerUser(payload: $payload) {\n        username\n        firstname\n        lastname\n      }\n    }\n": types.RegisterUserDocument,
+    "\n    #graphql\n    mutation RegisterUser($payload: UserCreateInput!){\n      registerUser(payload: $payload) {\n        success\n        message\n      }\n    }\n": types.RegisterUserDocument,
     "\n    #graphql\n    mutation SendOTPVerificationEmail($email: String!){\n      sendOTPVerificationEmail(email: $email) {\n        success\n        message\n      }\n    }\n": types.SendOtpVerificationEmailDocument,
     "\n    #graphql\n    mutation VerifyOTP($email: String!, $otp:String!){\n      verifyOTP(email: $email , otp: $otp) {\n        success\n        message\n      }\n    }\n": types.VerifyOtpDocument,
     "\n    #graphql\n    mutation UpdateUserProfileDetails($payload: UpdateUserProfileDetailsInput!){\n      updateUserProfileDetails(payload: $payload) {\n        firstname\n        lastname\n        username\n        avatar\n      }\n    }\n": types.UpdateUserProfileDetailsDocument,
@@ -74,7 +74,7 @@ export function graphql(source: "\n  #graphql\n  mutation LoginUser($payload: Us
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n    #graphql\n    mutation RegisterUser($payload: UserCreateInput!){\n      registerUser(payload: $payload) {\n        username\n        firstname\n        lastname\n      }\n    }\n"): (typeof documents)["\n    #graphql\n    mutation RegisterUser($payload: UserCreateInput!){\n      registerUser(payload: $payload) {\n        username\n        firstname\n        lastname\n      }\n    }\n"];
+export function graphql(source: "\n    #graphql\n    mutation RegisterUser($payload: UserCreateInput!){\n      registerUser(payload: $payload) {\n        success\n        message\n      }\n    }\n"): (typeof documents)["\n    #graphql\n    mutation RegisterUser($payload: UserCreateInput!){\n      registerUser(payload: $payload) {\n        success\n        message\n      }\n    }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

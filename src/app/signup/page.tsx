@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useCurrentUser, useLoginUser, useRegisterUser } from "../../../hooks/user";
+import { useRegisterUser } from "../../../hooks/user";
 
 import { Eye , Check ,X } from 'lucide-react';
 import toast from "react-hot-toast";
@@ -45,7 +45,7 @@ const Page = () => {
   });
 
   //OTP 
-  const [otp , setOtp] = useState("")
+  const [otp , setOtp] = useState(null);
 
   //Password Hide or not
   const [isPasswordVisible , setIsPasswordVisible] = useState(false)
@@ -54,33 +54,35 @@ const Page = () => {
   const [isEmailUnique, setIsEmailUnique] = useState<boolean | null | undefined>(false);
 
   
-
-  useEffect(() => {
-    const handleIsEmailValid = async() => {
-      try {
-        const emailValid = await checkIsEmailUnique(formData.email)
-        setIsEmailUnique(emailValid?.checkEmailIsValid)
-      } catch (error) {
-          console.error("Error occured" , error)
-      }
-    };
-    handleIsEmailValid()
-  }, [formData.email]);
+  const handleIsEmailValid = useCallback(async() => {
+    try {
+      const emailValid = await checkIsEmailUnique(formData.email)
+      setIsEmailUnique(emailValid?.checkEmailIsValid)
+    } catch (error) {
+        console.error("Error occured" , error)
+    }
+  },[formData.email]);
 
   //Check is Username Unique
   const [isUsernameUnique, setIsUsernameUnique] = useState<boolean | null | undefined>(false);
 
+  const handleIsUsernameValid = useCallback(async() => {
+    try {
+      const usernameValid = await checkIsUsernameUnique(formData.username)
+      setIsUsernameUnique(usernameValid?.checkUsernameIsValid)
+    } catch (error) {
+        console.error("Error occured" , error)
+    }
+  },[formData.username]);
+
   useEffect(() => {
-    const handleIsUsernameValid = async() => {
-      try {
-        const usernameValid = await checkIsUsernameUnique(formData.username)
-        setIsUsernameUnique(usernameValid?.checkUsernameIsValid)
-      } catch (error) {
-          console.error("Error occured" , error)
-      }
-    };
-    handleIsUsernameValid()
-  }, [formData.username]);
+    if(formData.username){
+      handleIsUsernameValid()
+    }
+    if(formData.email){
+      handleIsEmailValid()
+    }
+  }, [formData.email, formData.username, handleIsEmailValid, handleIsUsernameValid]);
 
   
   const handleChange = (e: any) => {
@@ -93,16 +95,13 @@ const Page = () => {
     setIsSubmitting(true)
    try {
       const res = await sendOTPVerificationEmail(formData.email)
-      console.log(res);
-      toast.success('Message sent successfully!');
       if(res?.sendOTPVerificationEmail.message == "OTP sent successfully!"){
         setIsSubmitting(false)
         setCurrentStep(()=> currentStep + 1)
       }
-   } catch (error) {
-    setIsSubmitting(false)
-      console.error("Error occured while sending email.Try again :", error);
-      return null;
+   } catch (error:any) {
+      setIsSubmitting(false)
+      toast.error(error && error?.message);
    }
   };
 
@@ -111,15 +110,16 @@ const Page = () => {
     e.preventDefault()
     try {
       const res = await verifyOTP(formData.email, otp)
-      if(res?.verifyOTP.message === "OTP verified successfully!"){
+      if(res?.verifyOTP.success === true){
+        console.log("otp res", res)
         await handleRegisterForm()
         setIsSubmitting(false)
         router.push('/')
       }
-    } catch (error) {
+    } catch (error:any) {
       setIsSubmitting(false)
-      console.error("Error occured while OTP verification:", error);
-      return null;
+      toast.error(error?.response?.errors?.[0]?.message  ||  "An error occurred during OTP verification.")
+      console.error("Error occured while OTP verification:", error.message);
     }
   }
 
@@ -241,7 +241,7 @@ const Page = () => {
 
               <div>
                 <button
-                  disabled={!formData.email || !formData.firstname || !formData.lastname || !formData.password || !formData.username}
+                  disabled={!formData.email || !formData.firstname || !formData.lastname || !formData.password || !formData.username || !isEmailUnique}
                   onClick={handleOTPVerificationEmailSend}
                   className={`inline-flex h-10 w-full items-center justify-center rounded-md bg-black dark:text-black dark:bg-white px-3.5 py-2.5 font-semibold leading-7 text-white hover:bg-black/80 cursor-pointer`}
                 >
@@ -254,7 +254,7 @@ const Page = () => {
       </div>
     </section>)
     }
-    {currentStep === 2 && <EmailPage otp={otp} setOtp={setOtp} handleVerifyOtp={handleVerifyOtp}/>}
+    {currentStep === 2 && <EmailPage userEmail ={formData.email} setOtp={setOtp} handleVerifyOtp={handleVerifyOtp}/>}
   </>
   );
 };
@@ -271,7 +271,8 @@ export const checkIsUsernameUnique = async (username: string) => {
     return isUsernameValid;
   } catch (error) {
     console.error("Error fetching user information:", error);
-    return null;
+    throw error
+
   }
 };
 
@@ -284,7 +285,8 @@ export const checkIsEmailUnique = async (email: string) => {
     return isEmailValid;
   } catch (error) {
     console.error("Error fetching user information:", error);
-    return null;
+    throw error
+
   }
 };
 
@@ -294,16 +296,17 @@ export const sendOTPVerificationEmail = async(email:string) => {
     return response
   } catch (error) {
     console.error("Error occured while sending email. Try again :", error);
-    return null;
+    throw error
+
   }
 };
 
-export const verifyOTP = async(email:string , otp: string)=> {
+export const verifyOTP = async(email:string , otp:any)=> {
   try {
     const response = await graphqlClient.request(verifyOTPMutation , {email , otp});
     return response
   } catch (error) {
     console.error("Error occured while otp verification. Try again :", error);
-    return null;
+    throw error;
   }
 }

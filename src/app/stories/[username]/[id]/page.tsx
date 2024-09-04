@@ -15,8 +15,8 @@ import { useCurrentUser } from "../../../../../hooks/user";
 import { getMediaType } from "@/config/GetMediaType";
 import Video from "@/components/Video";
 import SendButton from "@/components/Button";
-import { sendMessage } from "@/helpers/sendMessage";
 import { useChatContext } from "@/context/ChatContext";
+import socket from "@/lib/socket";
 
 
 const StoryPage = () => {
@@ -85,22 +85,25 @@ const StoryPage = () => {
   
   const handleSendStoryReplyToMsg = async(e:any) => {
       e.preventDefault()
-      await sendMessage({ 
-        messageContent:storyReplyContent, 
-        selectedChatId: storyUserChatId, 
-        recipientUser: currentStory?.user, 
-        setIsMessageSending, 
-        setMessageContent: setStoryReplyContent ,
-        storyId: currentStory?.id
-      });
+      setIsMessageSending(true);
+      const messagePayload = {
+        content: storyReplyContent,
+        chatId: storyUserChatId,
+        senderId: user?.id,
+        recipientId: currentStory?.user?.id,
+        storyId: currentStory?.id,
+        createdAt: Date.now()
+      };
+      socket.emit('sendMessage', messagePayload);
       toast.success('message sent..');
+      setIsMessageSending(false);
   };
 
 
   //automatically Move to next story
   useEffect(() => {
     let timer: any;
-    if (!isPaused) {
+    if (!isPaused && currentStory?.mediaUrl) {
       timer = setTimeout(() => {
         setProgress((prevProgress) => {
           if(prevProgress >= 100){

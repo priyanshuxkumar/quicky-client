@@ -1,12 +1,25 @@
 'use client'
 
 import Link from "next/link";
-import React from "react";
+import React, { useCallback } from "react";
 
 import Image from "next/image";
 import email from "../../../../../public/email.png"
+import { sendOTPVerificationEmail } from "../../page";
+import toast from "react-hot-toast";
 
-const EmailPage = ({setOtp, handleVerifyOtp}) => {
+const EmailPage = ({userEmail ,setOtp, handleVerifyOtp}:{userEmail:any, setOtp:any ,handleVerifyOtp:any }) => {
+  const sendOtpAgain = useCallback(async() => {
+    try {
+      const res = await sendOTPVerificationEmail(userEmail)
+      if(res?.sendOTPVerificationEmail.message == "OTP sent successfully!"){
+        toast.success(res?.sendOTPVerificationEmail.message)
+      }
+   } catch (error:any) {
+      toast.error(error && error?.message);
+   }
+  },[userEmail]);
+
   return (
     <section>
       <div className="flex items-center justify-center px-4 py-10 sm:px-6 sm:py-16 lg:px-8 lg:py-24">
@@ -40,6 +53,15 @@ const EmailPage = ({setOtp, handleVerifyOtp}) => {
               </div>
             </div>
           </form>
+
+          <div className="mt-6">
+              <button
+                onClick={sendOtpAgain}
+                className="inline-flex w-full h-10 items-center justify-center rounded-md bg-green-500 px-3.5 py-2.5 font-semibold leading-7 text-white hover:bg-green-400">
+                Send OTP again
+              </button>
+          </div>
+
           <div className="mt-8">
             <p className="mt-1 text-center text-base text-gray-600">
               Already have an account?{" "}

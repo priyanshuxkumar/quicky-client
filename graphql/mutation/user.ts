@@ -17,9 +17,8 @@ export const registerUserMutation = graphql(`
     #graphql
     mutation RegisterUser($payload: UserCreateInput!){
       registerUser(payload: $payload) {
-        username
-        firstname
-        lastname
+        success
+        message
       }
     }
 `)

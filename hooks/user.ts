@@ -27,7 +27,7 @@ export const useRegisterUser = () => {
         },
         onError: (error) => {
           console.error('Error in Register User:', error);
-          toast.error("Invalid credentials", {id: '2'})
+          toast.error("Error occured while signup", {id: '2'})
         }
     });
     return mutation;

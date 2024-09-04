@@ -11,6 +11,7 @@ import { graphqlClient } from '../../../clients/api';
 import { updateMsgSeenStatusMutation } from '../../../graphql/mutation/chat';
 import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { number } from 'zod';
 
 
 
@@ -33,13 +34,15 @@ const ChatCard : React.FC<ChatCardProps> = ({ data , onClick}) => {
   const [isMsgSeen , setIsMsgSeen] =  useState<boolean | null | undefined >(data.messages && data?.messages[0]?.isSeen);
 
   //state of recent message senderid == current user id
-  const [senderId , setSenderId] = useState<boolean | null | undefined >(data.messages && data.messages[0]?.senderId == user?.id)
+  // const [senderId , setSenderId] = useState<boolean | null | undefined >(data.messages && data.messages[0]?.senderId == user?.id)
+  const senderId = (data.messages && data.messages[0]?.senderId == user?.id)
+
 
   //Chat click fn
   const handleClick = () => {
     onClick(data.id);
     setRecipientUser(secondUserInfoOnChat) 
-    router.push(`#${secondUserInfoOnChat.username}`)
+    router.push(`#${secondUserInfoOnChat?.id}`)
     
     //Updating status of message seen 
     if(isMsgSeen === false && senderId == false) {
@@ -85,13 +88,13 @@ const ChatCard : React.FC<ChatCardProps> = ({ data , onClick}) => {
                     <h5 className="text-[15px] font-semibold dark:text-white">{secondUserInfoOnChat?.lastname}</h5>
                   </div>
                     <div>
-                      <span className='text-xs font-medium dark:text-white/70 tracking-wide'>{timeOfLastMessageOnChat}</span>
+                      {timeOfLastMessageOnChat == typeof(number) ? <span className='text-xs font-medium dark:text-white/70 tracking-wide'>{timeOfLastMessageOnChat}</span> : ''}
                     </div>
                 </div>
 
                 <div className='flex items-center h-5 w-full'>
                     {/* Lastest Message on Chat */}
-                    <p className={`${data.messages && isMsgSeen == false && senderId == false &&  'dark:text-white text-black'} text-sm w-11/12 font-medium text-gray-600  dark:text-white/70 truncate`}>{senderId == true && <span className='font-semibold text-black dark:text-white'>You:</span>} {data.messages && (!data.messages[0]?.content  ? 'Sent an attachment' : data.messages[0]?.content)}</p>
+                    <p className={`${data.messages && isMsgSeen == false && senderId == false &&  'dark:text-white text-black'} text-sm w-11/12 font-medium text-gray-600  dark:text-white/70 truncate`}>{senderId == true && <span className='font-semibold text-black dark:text-white'>You:</span>} {data.messages && (!data.messages[0]?.content  ? '' : data.messages[0]?.content)}</p>
                    
                     <div className='h-full flex items-center'>
                       {/* Unread message Icon */}

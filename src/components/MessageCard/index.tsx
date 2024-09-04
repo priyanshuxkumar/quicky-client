@@ -16,7 +16,7 @@ interface MessageCardProps {
 }
 
 const MessageCard: React.FC<MessageCardProps> = ({ data }) => {
-  const { user } = useCurrentUser();
+   const { user } = useCurrentUser();
 
   //Message send time
   const msgCreatedTime = messageSendTime(new Date(Number(data?.createdAt.toString())));
@@ -48,7 +48,6 @@ const MessageCard: React.FC<MessageCardProps> = ({ data }) => {
         {/* Shared Image  */}
         {data?.shareMediaUrl && (
           <div
-          onClick={handleFullScreenOfMedia}
             className={`flex ${
               data?.senderId == user?.id && "justify-end"
             } w-full bg-transparent`}
@@ -56,6 +55,7 @@ const MessageCard: React.FC<MessageCardProps> = ({ data }) => {
             {data?.shareMediaUrl ?
               (mediaType == "image" ? (
                 <Image
+                  onClick={handleFullScreenOfMedia}
                   priority={false}
                   className="inline-block w-40 h-48 rounded-lg object-cover border-[0.5px] border-gray-500 cursor-pointer"
                   src={data?.shareMediaUrl}
@@ -64,7 +64,9 @@ const MessageCard: React.FC<MessageCardProps> = ({ data }) => {
                   width={100}
                 />
               ) : (
+                <div onClick={handleFullScreenOfMedia}>
                 <Video mediaUrl={data?.shareMediaUrl} />
+                </div>
               )) : <Loading size={32} width={2}/>}
           </div>
         )}
