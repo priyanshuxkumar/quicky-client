@@ -3,15 +3,13 @@
 import { Chat } from '../../../gql/graphql'
 import { useCurrentUser } from '../../../hooks/user'
 import { getOtherUserInfoOnChat } from '@/config/ChatLogic'
-import Image from "next/image";
 import { getTimeAgoString } from '@/config/TimeServices'
 import { useChatContext } from '@/context/ChatContext'
-import { Dot } from 'lucide-react';
 import { graphqlClient } from '../../../clients/api';
 import { updateMsgSeenStatusMutation } from '../../../graphql/mutation/chat';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { number } from 'zod';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 
 
 
@@ -21,6 +19,8 @@ interface ChatCardProps {
 };
 
 const ChatCard : React.FC<ChatCardProps> = ({ data , onClick}) => {
+  const router = useRouter()
+
   //Change selected Chat Background Color
   const {selectedChatId , setRecipientUser } = useChatContext()
 
@@ -34,7 +34,6 @@ const ChatCard : React.FC<ChatCardProps> = ({ data , onClick}) => {
   const [isMsgSeen , setIsMsgSeen] =  useState<boolean | null | undefined >(data.messages && data?.messages[0]?.isSeen);
 
   //state of recent message senderid == current user id
-  // const [senderId , setSenderId] = useState<boolean | null | undefined >(data.messages && data.messages[0]?.senderId == user?.id)
   const senderId = (data.messages && data.messages[0]?.senderId == user?.id)
 
 
@@ -42,7 +41,7 @@ const ChatCard : React.FC<ChatCardProps> = ({ data , onClick}) => {
   const handleClick = () => {
     onClick(data.id);
     setRecipientUser(secondUserInfoOnChat) 
-    router.push(`#${secondUserInfoOnChat?.id}`)
+    router.replace(`#${secondUserInfoOnChat?.username}`)
     
     //Updating status of message seen 
     if(isMsgSeen === false && senderId == false) {
@@ -54,61 +53,86 @@ const ChatCard : React.FC<ChatCardProps> = ({ data , onClick}) => {
   //Fetching time of last message
   const createdAt = new Date(Number(data.messages && data?.messages[0]?.createdAt)); 
   const timeOfLastMessageOnChat = getTimeAgoString(createdAt);
-
-  //Clicking on image and navigate to story page if story exists
-  const router = useRouter()
-  const handleImageClickToNavStory = useCallback(() => {
-    router.replace(`/stories/${secondUserInfoOnChat?.username}/${secondUserInfoOnChat?.id}`)
-  },[secondUserInfoOnChat , router]);
-
   return (
     <>
-    <div  className={`${data.id == selectedChatId && 'bg-primary dark:bg-dark-secondary '} transition duration-500 px-4 py-2 my-2 cursor-pointer hover:bg-primary dark:hover:bg-dark-secondary`}>
+      <div
+        className={`${
+          data.id == selectedChatId && "bg-primary dark:bg-dark-secondary "
+        } transition duration-500 px-4 py-2 my-2 cursor-pointer hover:bg-primary dark:hover:bg-dark-secondary`}
+      >
         <div className="flex gap-3 items-center">
-            <div className="min-w-14 min-h-14 flex flex-col justify-center relative">
-                {secondUserInfoOnChat && secondUserInfoOnChat?.avatar &&
-                    <Image
-                        onClick={handleImageClickToNavStory}
-                        priority= {false}
-                        className="inline-block h-12 w-12 rounded-full ring-1 ring-gray-300 dark:ring-gray-600 ring-offset-2 dark:ring-offset-black"
-                        src={secondUserInfoOnChat?.avatar}
-                        alt="avatar"
-                        height={30}
-                        width={30}
-                    />
-                }
+          <div className="min-w-14 min-h-14 flex flex-col justify-center relative">
+            {
+              secondUserInfoOnChat && secondUserInfoOnChat?.avatar ? (
+                <Avatar
+                  className="h-12 w-12"
+                >
+                  <AvatarImage src={secondUserInfoOnChat?.avatar} />
+                </Avatar>
+              ) : (
+                <Avatar className="h-12 w-12">
+                  <AvatarFallback>{((secondUserInfoOnChat?.firstname?.[0] || '') + (secondUserInfoOnChat?.lastname?.[0] || '')).toUpperCase()}</AvatarFallback>
+                </Avatar>
+              )
+            }
+
+            {secondUserInfoOnChat && secondUserInfoOnChat?.isActive && (
+              <span className="absolute bottom-1 right-0 block h-2.5 w-2.5 rounded-full bg-green-600 ring-2 ring-white"></span>
+            )}
+          </div>
+          <div onClick={handleClick} className="w-full overflow-hidden">
+            <div className="flex justify-between pr-1 items-center gap-1">
+              <div className="flex gap-1">
+                <h5 className="text-[15px] font-semibold dark:text-white">
+                  {" "}
+                  {secondUserInfoOnChat?.firstname}{" "}
+                </h5>
+                <h5 className="text-[15px] font-semibold dark:text-white">
+                  {secondUserInfoOnChat?.lastname}
+                </h5>
+              </div>
+              <div>
                 {
-                  secondUserInfoOnChat && secondUserInfoOnChat?.isActive && <span className="absolute bottom-1 right-0 block h-2.5 w-2.5 rounded-full bg-green-600 ring-2 ring-white"></span>
+                  <span className="dark:text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                    {timeOfLastMessageOnChat}
+                  </span>
                 }
+              </div>
             </div>
-            <div onClick={handleClick} className="w-full overflow-hidden">
-                <div className="flex justify-between  items-center gap-1">
-                  <div className='flex gap-1'>
-                    <h5 className="text-[15px] font-semibold dark:text-white"> {secondUserInfoOnChat?.firstname} </h5>
-                    <h5 className="text-[15px] font-semibold dark:text-white">{secondUserInfoOnChat?.lastname}</h5>
-                  </div>
-                    <div>
-                      {timeOfLastMessageOnChat == typeof(number) ? <span className='text-xs font-medium dark:text-white/70 tracking-wide'>{timeOfLastMessageOnChat}</span> : ''}
-                    </div>
-                </div>
 
-                <div className='flex items-center h-5 w-full'>
-                    {/* Lastest Message on Chat */}
-                    <p className={`${data.messages && isMsgSeen == false && senderId == false &&  'dark:text-white text-black'} text-sm w-11/12 font-medium text-gray-600  dark:text-white/70 truncate`}>{senderId == true && <span className='font-semibold text-black dark:text-white'>You:</span>} {data.messages && (!data.messages[0]?.content  ? '' : data.messages[0]?.content)}</p>
-                   
-                    <div className='h-full flex items-center'>
-                      {/* Unread message Icon */}
-                      {isMsgSeen == false && senderId == false && data.messages && data?.messages[0]?.content  && <Dot size={40} className='text-[#3290EC]'/>}
-                    </div>
-                </div>
+            <div className="flex items-center pr-1 h-5 w-full justify-between">
+              {/* Lastest Message on Chat */}
+              <p
+                className={`${
+                  data.messages &&
+                  isMsgSeen == false &&
+                  senderId == false &&
+                  "dark:text-white text-black"
+                } text-sm w-11/12 font-medium text-gray-600  dark:text-white/70 truncate`}
+              >
+                {senderId == true && (
+                  <span className="font-semibold text-black dark:text-white">
+                    You:
+                  </span>
+                )}{" "}
+                {data.messages &&
+                  (!data.messages[0]?.content
+                    ? "You sent an attachment"
+                    : data.messages[0]?.content)}
+              </p>
 
+              <div className="h-full flex  items-center">
+                {/* Unread message Count */}
+                <span className="bg-blue-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                  1
+                </span>
+              </div>
             </div>
+          </div>
         </div>
-    </div>
-    
+      </div>
     </>
-
-  )
+  );
 };
 
 export default ChatCard;
@@ -118,7 +142,6 @@ const updateMsgSeenStatusFn = async(chatId :string) => {
      const response = await graphqlClient.request(updateMsgSeenStatusMutation , {chatId})
      if(response.updateMsgSeenStatus.success == true) return
    } catch (error) {
-      console.error("Error occured while update message seen status ", error);
-      return null;
+      throw error;
    }
 }

@@ -1,4 +1,4 @@
-import { X } from 'lucide-react'
+import { X } from 'lucide-react';
 import React from 'react'
 
 const CreateStory = () => {
@@ -12,4 +12,4 @@ const CreateStory = () => {
   )
 }
 
-export default CreateStory
+export default CreateStory;

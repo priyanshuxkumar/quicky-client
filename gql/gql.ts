@@ -28,7 +28,7 @@ const documents = {
     "\n  #graphql\n  query GetSignedUrlOfChat( $imageName: String! $imageType: String!) {\n    getSignedUrlOfChat(imageName: $imageName imageType: $imageType)\n  }\n": types.GetSignedUrlOfChatDocument,
     "\n  #graphql\n  query FetchSharedMediaOfChat($chatId:String!){\n    fetchSharedMediaOfChat(chatId:$chatId){\n      id\n      shareMediaUrl\n    }\n  }\n\n": types.FetchSharedMediaOfChatDocument,
     "\n  #graphql\n  query FetchUserStories($userId: String!) {\n    fetchUserStories(userId: $userId) {\n        id\n        mediaUrl\n        user {\n           id\n           username\n           avatar\n        }\n        expiresAt\n        createdAt\n        updatedAt\n    }\n  }\n": types.FetchUserStoriesDocument,
-    "\n  #graphql\n  query FetchStoryOfChatUsers {\n    fetchStoryOfChatUsers {\n      id\n      username\n      avatar\n      chatId\n    }\n  }\n": types.FetchStoryOfChatUsersDocument,
+    "\n  #graphql\n  query FetchStoryOfChatUsers {\n    fetchStoryOfChatUsers {\n      id\n      username\n      firstname\n      lastname\n      avatar\n      chatId\n    }\n  }\n": types.FetchStoryOfChatUsersDocument,
     "\n  #graphql\n  query GetSignedUrlOfStoryMedia($mediaName: String! $mediaType: String!) {\n    getSignedUrlOfStoryMedia(mediaName: $mediaName mediaType: $mediaType)\n  }\n": types.GetSignedUrlOfStoryMediaDocument,
     "\n    #graphql\n    query GetCurrentUser {\n        getCurrentUser {\n            id\n            username\n            firstname\n            lastname\n            email\n            avatar  \n        }\n    }\n": types.GetCurrentUserDocument,
     "\n    #graphql\n    query CheckUsernameIsValid($username: String!) {\n        checkUsernameIsValid(username: $username)\n    }\n": types.CheckUsernameIsValidDocument,
@@ -114,7 +114,7 @@ export function graphql(source: "\n  #graphql\n  query FetchUserStories($userId:
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  #graphql\n  query FetchStoryOfChatUsers {\n    fetchStoryOfChatUsers {\n      id\n      username\n      avatar\n      chatId\n    }\n  }\n"): (typeof documents)["\n  #graphql\n  query FetchStoryOfChatUsers {\n    fetchStoryOfChatUsers {\n      id\n      username\n      avatar\n      chatId\n    }\n  }\n"];
+export function graphql(source: "\n  #graphql\n  query FetchStoryOfChatUsers {\n    fetchStoryOfChatUsers {\n      id\n      username\n      firstname\n      lastname\n      avatar\n      chatId\n    }\n  }\n"): (typeof documents)["\n  #graphql\n  query FetchStoryOfChatUsers {\n    fetchStoryOfChatUsers {\n      id\n      username\n      firstname\n      lastname\n      avatar\n      chatId\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

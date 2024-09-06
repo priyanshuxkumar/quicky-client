@@ -1,19 +1,26 @@
+import { Button } from "../ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../ui/card";
+
 const Logout = ({handleLogout , handleLogoutPageOpenState}: {handleLogout: any ,  handleLogoutPageOpenState:any}) => { //Fix later fn type
   return (
-    <div className="w-1/4 rounded-2xl py-8 px-8 bg-white dark:bg-dark-primary-bg z-50 border-[0.2px] border-gray-300 dark:border-gray-600">
-      <div className="my-4">
-        <p className="font-semibold text-2xl  text-black dark:text-white">
-          Logout of Quicky?
+    <Card className="w-[350px]">
+      <CardHeader className="pt-5">
+        <CardTitle className="text-center"> Logout of Quicky?</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-center text-muted-foreground">
+          Are you sure you want to logout?
         </p>
-        <p className="font-medium text-sm mt-2  text-black dark:text-white">Are you sure want to Logout ?</p>
-      </div>
-      <div onClick={handleLogout} className="mt-5   cursor-pointer rounded-full border bg-white border-black px-3 py-3 text-sm font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black">
-        <p className="text-center">Logout</p>
-      </div>
-      <div onClick={handleLogoutPageOpenState} className="my-3 cursor-pointer rounded-full border border-black dark:border-white px-3 py-3 text-sm font-semibold text-black dark:text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black">
-        <p className="text-center">Cancel</p>
-      </div>
-    </div>
+      </CardContent>
+      <CardFooter className="flex justify-between">
+        <Button variant="outline" onClick={handleLogoutPageOpenState}>
+          Cancel
+        </Button>
+        <Button onClick={handleLogout} className="text-black dark:white">
+          Logout
+        </Button>
+      </CardFooter>
+    </Card>
   );
 };
 

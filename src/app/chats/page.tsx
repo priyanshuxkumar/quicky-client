@@ -60,7 +60,7 @@ export default function Chats() {
       setSearchedUsers(users);
       setIsUserSearchLoading(false)
     } catch (error) {
-      setIsUserSearchLoading(false)
+      setIsUserSearchLoading(false);
       console.error("Error occured", error);
     }
   },[searchQuery]);
@@ -71,6 +71,7 @@ export default function Chats() {
     setIsChatBoxOpen(true);
     if(user.id){
       setRecipientUser(user as User);
+      router.replace(`#${user?.username}`)
       const recipientUserChatsIds = user.users?.map((chat)=> chat?.chat?.id);
       
       const currentUserChatsIds = chats?.map((chat)=> chat.id);
@@ -81,12 +82,11 @@ export default function Chats() {
       }
     }
     setSearchQuery("");
-  },[chats, setIsChatBoxOpen, setRecipientUser, setSelectedChatId]);
+  },[chats, router, setIsChatBoxOpen, setRecipientUser, setSelectedChatId]);
 
 
   //Fetching all Chats Users stories
   const {stories} = useFetchStories();
-
   return (
     <>
     <div>
@@ -177,7 +177,6 @@ export const fetchSearchQueryResult = async (username: string) => {
     const user: User[] = userInfo.getUserByUsername as User[];
     return user;
   } catch (error) {
-    console.error("Error fetching user information:", error);
-    return null;
+    throw error;
   }
 };

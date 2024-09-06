@@ -1,20 +1,14 @@
 "use client";
 
 import { QuickyLayout } from "@/components/Layout/QuickyLayout";
-import { ChevronLeft, Camera, Check, X } from "lucide-react";
-import Link from "next/link";
-import React, { useCallback, useEffect, useState } from "react";
-import Image from "next/image";
+import { ChevronLeft} from "lucide-react";
+import React, { useState } from "react";
 
-import { useCurrentUser } from "../../../../../hooks/user";
 import { graphqlClient } from "../../../../../clients/api";
-import { changePasswordMutation, updateUserProfileDetailsMutation } from "../../../../../graphql/mutation/user";
-import {
-  UpdateUserProfileDetailsInput,
-  User,
-} from "../../../../../gql/graphql";
+import { changePasswordMutation } from "../../../../../graphql/mutation/user";
 
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 const ProfileEdit = () => {
   const router = useRouter();
@@ -35,12 +29,16 @@ const ProfileEdit = () => {
     setPassword({ ...password, [name]: value });
   };
 
-  const handlePasswordChange = async() => {
+  const handlePasswordChange = async(e:any) => {
+    e.preventDefault();
     try {
       const response = await changePasswordFn(password.oldpassword , password.newpassword , password.confirmpassword)
-      console.log("responsepassword",response)
-    } catch (error) {
-      console.log("error", error)
+      if(response?.success == true){
+        toast.success(response?.message)
+        router.replace('/chats');
+      }
+    } catch (error:any) {
+      toast.error(error.response.errors[0].message)
     }
   }
 
@@ -125,7 +123,6 @@ const changePasswordFn = async (oldPassword :string, newPassword :string, confir
     const response = await graphqlClient.request(changePasswordMutation, {oldPassword , newPassword , confirmPassword});
     return response.changePassword
   } catch (error) {
-    console.error("Error while changing password", error);
-    return null;
+    throw error
   }
 };

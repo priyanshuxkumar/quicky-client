@@ -1,93 +1,69 @@
-import { AtSign, X } from "lucide-react";
+import { AtSign, ImageIcon, X } from "lucide-react";
 
 import Image from "next/image";
 import { User } from "../../../gql/graphql";
 import { useFetchSharedMediaOfChat } from "../../../hooks/user";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
 
 //Recipient User Info Container
 const UserProfileContainer = ({ handleUserInfoContainer , user } : {handleUserInfoContainer: React.FC , user: User}) => {
   const {isLoading, mediaOfChat} = useFetchSharedMediaOfChat();
   return (
-    <div className="right-container dark:bg-dark-primary-bg h-screen overflow-y-scroll scrollbar-style">
-      <div className="user-info">
-        <div className="top-bar bg-white dark:bg-dark-primary-bg flex w-full px-4 py-5 gap-6 items-center justify-between sticky top-0 z-50">
-          <div className="flex items-center gap-3">
-            <div onClick={handleUserInfoContainer} className="cursor-pointer">
-              <X size={24} className="text-black dark:text-white " />
-            </div>
-
-            <div>
-              <p className="text-black text-md dark:text-white ">User info</p>
-            </div>
+    <Card className="w-full h-full max-w-md mx-auto">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-md font-medium">User info</CardTitle>
+        <Button onClick={handleUserInfoContainer} variant="ghost" size="icon">
+          <X className="h-4 w-4" />
+          <span className="sr-only">Close</span>
+        </Button>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col items-center space-y-4">
+        {user && user.avatar ? (
+              <Avatar className="h-28 w-28">
+                <AvatarImage src={user?.avatar} />
+              </Avatar>
+            ) : (
+              <Avatar className="h-28 w-28">
+                <AvatarFallback>
+                  {((user?.firstname?.[0] || "") + (user?.lastname?.[0] || "")).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+        )}
+          <div className="space-y-1 text-center">
+            <h2 className="text-2xl font-semibold">Random_One User</h2>
+            <Badge variant="secondary">Online</Badge>
+          </div>
+          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+            <AtSign className="h-4 w-4" />
+            <span>random_user</span>
           </div>
         </div>
-
-        <div className="w-full my-4 dark:bg-dark-primary-bg">
-          <div className="flex justify-center">
-            {user && user.avatar && (
-              <Image
-                priority={false}
-                className="h-24 w-24 rounded-full object-cover ring-2 ring-accent-color ring-offset-2 dark:ring-offset-black"
-                src={user?.avatar}
-                alt="user_avatar"
-                width={30}
-                height={30}
-              />
-            )}
-          </div>
-          <div className="dark:bg-dark-primary-bg">
-            <p className="mt-3 text-center text-lg font-semibold text-black dark:text-white ">
-              {user?.firstname} {""} {user?.lastname}
-            </p>
-            <p className="text-center text-base text-gray-600 dark:text-slate-200">
-              Online
-            </p>
-          </div>
-        </div>
-
-        <div className="flex gap-1 items-center px-6 mt-10">
-          <div>
-            <span className="text-gray-500 dark:text-white ">
-              {" "}
-              <AtSign />{" "}
-            </span>
-          </div>
-          <div className="ml-3 min-w-0">
-            <p className="truncate text-xs text-gray-800 dark:text-white ">
-              Username
-            </p>
-            <p className="truncate text-sm text-gray-500 dark:text-slate-300">
-              {user?.username}
-            </p>
-          </div>
-        </div>
-
-        {/* Render all media of this chat starts */}
-        <div className="mt-5 dark:bg-dark-primary-bg">
-          <div className="px-3 py-4  dark:bg-dark-primary-bg">
-            <p className="font-semibold text-base">Media</p>
-          </div>
-
+        <div className="mt-6">
           {isLoading && <p>Loading...</p>}
-          <div className="flex flex-wrap">
-            {mediaOfChat && mediaOfChat.map((item) => (
-              <div key={item?.id} className="w-1/3 h-32 flex border border-black">
-                {item && item.shareMediaUrl && 
-                  <Image
-                    className="w-full h-full object-cover"
-                    src={item?.shareMediaUrl}
-                    width={50}
-                    height={50}
-                    alt="shared-media"
-                  />
-                }
+          {mediaOfChat && mediaOfChat?.length > 0 ? (
+            <div className="mt-6 grid grid-cols-3 gap-2">
+              {mediaOfChat && mediaOfChat.map((item) => ( 
+                <Image
+                  key={item.id}
+                  className="rounded-md object-cover w-full h-24"
+                  src={item?.shareMediaUrl || ''}
+                  width={50}
+                  height={50}
+                  alt="shared-media"
+                />
+              ))}
               </div>
-            ))}
-          </div>
+          ):(<div className="flex w-full flex-col items-center justify-center h-24 bg-muted rounded-md">
+            <ImageIcon className="h-8 w-8 text-muted-foreground mb-2" />
+            <p className="text-sm text-muted-foreground">No media found</p>
+          </div>)}
         </div>
-        {/* Render all media of this chat ends */}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

@@ -7,9 +7,7 @@ const DeleteMenu = ({handleStoryMenu, currentStoryId , userStories }:any) => {
     const handleStoryDelete = async () => {
         const response = await graphqlClient.request(deleteStoryMutation , {storyId:currentStoryId})
         if(response.deleteStory.success == true){
-            console.log("entered here")
-            const updatedStories = userStories.filter((story:Story) => story?.id !== currentStoryId)
-            console.log(updatedStories)
+            userStories.filter((story:Story) => story?.id !== currentStoryId)
             handleStoryMenu(); //Close Story menu tab
         }
     };

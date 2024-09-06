@@ -56,7 +56,7 @@ export default function Home() {
         identifier: formData.identifier,
         password: formData.password
       });
-      setFormData({identifier: "", password: ""});
+      setFormData({identifier: formData.identifier, password: ""});
       setIsSubmitting(false)
     } catch (error) {
       console.error('Error occured while login:', error);

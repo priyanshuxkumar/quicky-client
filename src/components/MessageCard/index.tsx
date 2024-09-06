@@ -76,10 +76,10 @@ const MessageCard: React.FC<MessageCardProps> = ({ data }) => {
             className={`${
               data?.senderId == user?.id
                 ? "bg-accent-color text-white rounded-se-none"
-                : "bg-white dark:bg-[#303030] rounded-es-none "
+                : "bg-slate-100 dark:bg-[#303030] rounded-es-none "
             } w-fit max-w-72 my-2 px-2 py-1 rounded-xl`}
           >
-            {data?.content}
+            <p> {data?.content}</p>
           </div>
         )}
         <div className="ml-1 w-fit">

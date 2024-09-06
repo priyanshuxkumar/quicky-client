@@ -1,32 +1,61 @@
-import { X } from "lucide-react";
+'use client';
 import Image from "next/image";
 import React from "react";
 
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Share, X , ImageIcon} from 'lucide-react'
+
 //Story Upload Component
-const ShowStoryMedia = ({handleSelectStoryMediaVisibility,selectedImageURL,handleUploadStory}: any) => {
+const ShowStoryMedia = ({selectedImageURL, setSelectedImageURL ,handleSelectMedia  , isSelectedStoryMediaPageShowing ,setIsSelectedStoryMediaPageShowing,handleSelectStoryMediaVisibility,handleUploadStory}: any) => {
   return (
-    <div className="w-screen h-screen flex justify-center">
-      <div className="flex flex-col gap-4 sm:w-1/3 h-full justify-center items-center">
-        <div className="w-full px-3 flex justify-between items-center">
-          <div onClick={handleSelectStoryMediaVisibility}>
-            <X size={28} className="text-slate-800 cursor-pointer" />
-          </div>
-          <div>
-            <p onClick={handleUploadStory} className="text-base cursor-pointer">
-              Share
-            </p>
+    <Dialog open={isSelectedStoryMediaPageShowing} onOpenChange={setIsSelectedStoryMediaPageShowing}>
+      <DialogContent className="sm:max-w-[425px]">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold">Add Story</h2>
+          <Button variant="ghost" size="icon" onClick={() => setIsSelectedStoryMediaPageShowing(false)}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+        <div className="space-y-4">
+          {selectedImageURL ? (
+            <div className="relative aspect-square">
+              <Image
+                src={selectedImageURL}
+                alt="Selected story image"
+                className="w-full h-full object-cover rounded-md"
+                width={200}
+                height={200}
+              />
+              <Button
+                variant="secondary"
+                size="icon"
+                className="absolute top-2 right-2 "
+                onClick={() => (setSelectedImageURL(null))}
+              > 
+                <X className="h-4 w-4"/>
+              </Button>
+            </div>
+          ) : (
+            <div
+              className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center cursor-pointer"
+              onClick={handleSelectMedia}
+            >
+              <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
+              <p className="mt-2 text-sm text-gray-500">Click to select an image</p>
+            </div>
+          )}
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setIsSelectedStoryMediaPageShowing(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleUploadStory} disabled={!handleSelectMedia} className="text-black dark:text-white">
+              <Share className="mr-2 h-4 w-4" /> Share Story
+            </Button>
           </div>
         </div>
-        <Image
-          priority={false}
-          className="inline-block h-3/4 w-full object-cover"
-          src={selectedImageURL}
-          alt="story-media"
-          height={100}
-          width={100}
-        />
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

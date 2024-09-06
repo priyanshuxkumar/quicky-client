@@ -55,12 +55,8 @@ const Page = () => {
 
   
   const handleIsEmailValid = useCallback(async() => {
-    try {
       const emailValid = await checkIsEmailUnique(formData.email)
       setIsEmailUnique(emailValid?.checkEmailIsValid)
-    } catch (error) {
-        console.error("Error occured" , error)
-    }
   },[formData.email]);
 
   //Check is Username Unique
@@ -111,7 +107,6 @@ const Page = () => {
     try {
       const res = await verifyOTP(formData.email, otp)
       if(res?.verifyOTP.success === true){
-        console.log("otp res", res)
         await handleRegisterForm()
         setIsSubmitting(false)
         router.push('/')
@@ -270,7 +265,6 @@ export const checkIsUsernameUnique = async (username: string) => {
     );
     return isUsernameValid;
   } catch (error) {
-    console.error("Error fetching user information:", error);
     throw error
 
   }
@@ -284,7 +278,6 @@ export const checkIsEmailUnique = async (email: string) => {
     );
     return isEmailValid;
   } catch (error) {
-    console.error("Error fetching user information:", error);
     throw error
 
   }
@@ -295,7 +288,6 @@ export const sendOTPVerificationEmail = async(email:string) => {
     const response = await graphqlClient.request(sendOTPVerificationEmailMutation , {email});
     return response
   } catch (error) {
-    console.error("Error occured while sending email. Try again :", error);
     throw error
 
   }
@@ -306,7 +298,6 @@ export const verifyOTP = async(email:string , otp:any)=> {
     const response = await graphqlClient.request(verifyOTPMutation , {email , otp});
     return response
   } catch (error) {
-    console.error("Error occured while otp verification. Try again :", error);
     throw error;
   }
 }

@@ -1,6 +1,6 @@
 import { User } from "../../../gql/graphql";
 import Loading from "../loading";
-import Image from "next/image";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 const SearchUser = ({searchedUsers , isUserSearchLoading , handleSearchUserClickActions}:any) => {
   return (
@@ -10,19 +10,20 @@ const SearchUser = ({searchedUsers , isUserSearchLoading , handleSearchUserClick
                   <div 
                     onClick={()=> handleSearchUserClickActions(user)}
                     key={user?.id}
-                    className={`px-4 py-1 my-2 cursor-pointer hover:bg-primary rounded-md`}
+                    className={`px-4 py-1 my-2 cursor-pointer hover:bg-primary dark:hover:bg-dark-secondary rounded-md`}
                   >
                     <div  className="flex gap-4 items-center">
                       <div className="w-14 h-14 flex flex-col justify-center">
-                        {user && user?.avatar && (
-                          <Image
-                            priority={false}
-                            className="inline-block min-h-12 min-w-12 max-h-12 max-w-12 rounded-full"
-                            src={user?.avatar}
-                            alt="avatar"
-                            height={20}
-                            width={20}
-                          />
+                        {user && user?.avatar ? (
+                          <Avatar
+                            className="h-12 w-12"
+                          >
+                            <AvatarImage src={user?.avatar} />
+                          </Avatar>
+                        ) : (
+                          <Avatar className="h-12 w-12">
+                            <AvatarFallback>{((user?.firstname?.[0] || '') + (user?.lastname?.[0] || '')).toUpperCase()}</AvatarFallback>
+                          </Avatar>
                         )}
                       </div>
                       <div className="w-full">

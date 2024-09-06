@@ -26,6 +26,8 @@ export const fetchStoryOfChatUsersQuery = graphql(`
     fetchStoryOfChatUsers {
       id
       username
+      firstname
+      lastname
       avatar
       chatId
     }

@@ -119,7 +119,6 @@ const ProfileEdit = () => {
         avatar: imageURL
       }
       const response = await updateUserProfileDetailsFn(variables)
-      console.log(response)
       if(response) {
         router.back()
         toast.success("Profile updated successfully")
