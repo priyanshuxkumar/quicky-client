@@ -83,6 +83,8 @@ const StoryPage = () => {
       };
       socket.emit('sendMessage', messagePayload);
       toast.success('message sent..');
+      setStoryReplyContent('');
+      setIsPaused(!isPaused);
       setIsMessageSending(false);
   };
 
@@ -199,7 +201,7 @@ const StoryPage = () => {
             )}
         </button>
         <button
-          className="absolute bottom-7 right-4 text-white"
+          className="absolute bottom-7 right-4 text-white cursor-pointer z-50"
           onClick={handlePlayPauseStory}
         >
           {isPaused ? <Play size={24} /> : <Pause size={24} />}
@@ -207,10 +209,10 @@ const StoryPage = () => {
       </div>
       {/* Reply Input  Start here */}
       {currentStory?.user?.id !== user?.id && (
-        <div className="relative bottom-16 left-0 sm:w-1/4 w-10/12">
+        <div className="relative bottom-16 left-0 sm:w-1/4 w-11/12">
           <form
             onSubmit={handleSendStoryReplyToMsg}
-            className="w-full flex justify-center"
+            className="w-11/12 flex justify-center"
           >
             <label
               htmlFor="storyreply"

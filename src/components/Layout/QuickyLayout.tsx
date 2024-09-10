@@ -43,6 +43,8 @@ import PopupSendMedia from "../PopupSendMedia";
 import { Input } from "../ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
+import InfiniteScroll from 'react-infinite-scroll-component';
+
 interface QuickySidebarButton {
   title: string;
   icon: React.ReactNode;
@@ -101,12 +103,12 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
   const [isMessageSending , setIsMessageSending] = useState(false);
 
   //Message Code Starts Here
-  const { selectedChatId, isChatBoxOpen, recipientUser , setIsChatBoxOpen}: any = useChatContext();
+  const { selectedChatId, isChatBoxOpen, recipientUser , setIsChatBoxOpen , setLatestMessage}: any = useChatContext();
 
-  //Lazzy-Loading
+  //Infinite -scrolling
   const limit = 15;
   const [offset, setOffset] = useState(0);
-  const [hasMoreMsg , setHasMoreMsg] = useState(false);
+  const [hasMoreMsg , setHasMoreMsg] = useState(true);
 
   //Fetch messages from hook
   const {isLoading, chatMessages} = useFetchChatMessages( selectedChatId , recipientUser?.id , limit , offset) ;
@@ -173,19 +175,49 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
       input.click()
   },[handleInputChangeFile])
 
-  useEffect(() => {
-    if (chatMessages) {
-      setGroupedMessages(groupMessagesByDate(chatMessages as Message[]));      
-    }else {
-      setGroupedMessages({});
+ 
+
+   // Function to load more messages when the user scrolls
+   const fetchMoreMessages = () => {
+    if (!isLoading && hasMoreMsg) {
+      setOffset(prevOffset => prevOffset + limit);
     }
+  };
+
+  useEffect(() => {
+    if (chatMessages && chatMessages.length > 0) {
+      setGroupedMessages((prevGroupedMessages) => {
+        let previousMessages: Message[] = [];
+  
+        Object.keys(prevGroupedMessages).forEach((date) => {
+          previousMessages = [...previousMessages, ...prevGroupedMessages[date]];
+        });
+  
+        // Combine previous messages with the newly fetched chat messages
+        const combinedMessages = [...chatMessages, ...previousMessages];
+  
+        // Using a Map for deduplication based on message ID
+        const messageMap = new Map(combinedMessages.map(msg => [msg.id, msg]));
+  
+        // Convert the Map back to an array
+        const deduplicatedMessages = Array.from(messageMap.values());
+  
+        // Group the deduplicated messages by date
+        const updatedGroupedMessages = groupMessagesByDate(deduplicatedMessages as Message[]);
+        return updatedGroupedMessages;
+      });
+
+      } else if (chatMessages && chatMessages?.length <= limit) {
+        setHasMoreMsg(false);
+      }
   }, [chatMessages , selectedChatId , recipientUser]);
+
 
   //SocketIO
   useEffect(() => {
-    socket.on("receivedMessage", (newMessage) => {
-      if (newMessage?.chatId != selectedChatId) {
-        // TODO - Give Notification
+    socket.on("receivedMessage", (newMessage : Message) => {
+      if(newMessage?.chatId){
+         setLatestMessage({chatId:newMessage?.chatId , newMessage: {content: newMessage.content , createdAt: newMessage?.createdAt}});
       };
       
       if (newMessage?.chatId === selectedChatId) {
@@ -211,12 +243,15 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
 
           return newGroupedMessages;
         });
+      }else {
+          // Todo: Send Notification
       }
     });
+
     return () => {
       socket.off("receivedMessage");
     };
-  }, [selectedChatId]);
+  }, [selectedChatId, setLatestMessage]);
 
   //Typing Implementation
   const [isTyping, setIsTyping] = useState(false);
@@ -333,8 +368,6 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
      router.replace(`/chats`)
      setIsChatBoxOpen(false)
    },[router, setIsChatBoxOpen]);
-
-   
   return (
     <>
       <div className="whole-page grid grid-cols-12 h-screen w-screen bg-white dark:bg-dark-primary-bg overflow-hidden">
@@ -452,19 +485,21 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
                   </div>
                 </div>
 
-                {/* Render Chat Messages  */}
-                <div className="px-8 sm:px-20 h-[82%] overflow-y-scroll scrollbar-style">
-                  {/* Loading symbol for fetch more messages  */}
-                  {hasMoreMsg && (
-                    <div className="flex justify-center w-full">
-                      <Loading size={30} width={2} />
-                    </div>
-                  )}
-
-                  {/* Render chat messages  */}
-                  {Object?.keys(groupedMessages)
-                    ?.reverse()
-                    .map((date) => (
+                {/* Render Chat Messages  with Infinite scrolling*/}
+                <div id="scrollableChat" className="px-8 sm:px-20 h-[82%] overflow-y-scroll scrollbar-style">
+                <InfiniteScroll
+                   className="no-scrollbar"
+                   dataLength={chatMessages ? chatMessages.length : 0} 
+                   next={fetchMoreMessages} 
+                   hasMore={hasMoreMsg} 
+                   inverse={true}
+                   loader={ <div className="flex justify-center w-full"><Loading size={30} width={1}/></div>} 
+                   scrollableTarget="scrollableChat"
+                   scrollThreshold={0}
+                > 
+                  {/* Render chat messages ends */}
+                
+                  {Object?.keys(groupedMessages)?.reverse().map((date) => (
                       <div key={date}>
                         <p className="my-3 text-sm text-center text-gray-500">
                           {format(new Date(date), "MMMM dd, yyyy")}
@@ -475,10 +510,11 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
                             <MessageCard key={msg?.id} data={msg as Message} />
                           ))}
                       </div>
-                    ))}
+                  ))}
+                  {/* Render chat messages  ends*/}
 
-                  {/* Message Loading State  */}
-                  {isLoading && (
+                   {/* Message Loading State  */}
+                   {isLoading && (
                     <div className="flex justify-center items-center h-full">
                       <Loading size={80} width={1} />
                     </div>
@@ -491,6 +527,8 @@ export const QuickyLayout: React.FC<QuickyLayoutProps> = (props) => {
                     </span>
                   )}
                   <div ref={messagesEndRef} />
+
+                </InfiniteScroll>
                 </div>
 
                 {/* Textarea for message typing  */}
@@ -581,5 +619,3 @@ export const sendMessageFn = async (payload:SendMessageInput) => {
        throw error;
     }
 };
-
-

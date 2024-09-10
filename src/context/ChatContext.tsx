@@ -15,6 +15,9 @@ interface ChatContextType {
 
     storyUserChatId: string | null;
     setStoryUserChatId: (chatId: string) => void;
+
+    latestMessages: { [key: string]: { content: string; createdAt: Date } };
+    setLatestMessage: ({ chatId, newMessage }: { chatId: string; newMessage: {content: string , createdAt: Date} }) => void;
 }
 
 const ChatContext = createContext<ChatContextType | null>(null);
@@ -37,10 +40,22 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     const [isChatBoxOpen, setIsChatBoxOpen] = useState<boolean>(false);
     const [recipientUser, setRecipientUser] = useState<User | null>(null);
     const [storyUserChatId, setStoryUserChatId] = useState<string | null>(null);
-
     
+    const [latestMessages, setLatestMessages] = useState<{ [key: string]: { content: string; createdAt: Date } }>({});
+
+    const setLatestMessage = ({chatId, newMessage} : {chatId:string , newMessage:{content: string , createdAt: Date}}) => {
+        if (!chatId) {
+            return;
+        }
+        setLatestMessages(prevMessages => ({
+        ...prevMessages,
+        [chatId]: newMessage
+        }));
+
+        
+    };
     return (
-        <ChatContext.Provider value={{ selectedChatId, setSelectedChatId , isChatBoxOpen, setIsChatBoxOpen , recipientUser , setRecipientUser , storyUserChatId , setStoryUserChatId}}>
+        <ChatContext.Provider value={{ selectedChatId, setSelectedChatId , isChatBoxOpen, setIsChatBoxOpen , recipientUser , setRecipientUser , storyUserChatId , setStoryUserChatId ,latestMessages, setLatestMessage}}>
             {children}
         </ChatContext.Provider>
     );

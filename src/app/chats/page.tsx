@@ -3,7 +3,7 @@
 import ChatCard from "@/components/ChatCard/index";
 import { QuickyLayout } from "@/components/Layout/QuickyLayout";
 import { useChatContext } from "@/context/ChatContext";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getUserByUsernameQuery } from "../../../graphql/query/user";
 import { User, Chat } from "../../../gql/graphql";
@@ -33,7 +33,7 @@ export default function Chats() {
 
   const { isLoading , chats } = useFetchAllChats();
 
-  const { setSelectedChatId, setIsChatBoxOpen, setRecipientUser } = useChatContext();
+  const { setSelectedChatId, setIsChatBoxOpen, setRecipientUser , latestMessages } = useChatContext();
 
   
   const handleSelectedChat = useCallback(async(chatId: string | any) => {
@@ -136,6 +136,7 @@ export default function Chats() {
                Chats
               </p>
               {chats && chats.map((chat) => (<ChatCard
+                  latestMessage={latestMessages[chat?.id] }
                   onClick={() => handleSelectedChat(chat?.id)}
                   key={chat?.id}
                   data={chat as Chat}/>)

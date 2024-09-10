@@ -16,9 +16,13 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 interface ChatCardProps {
     data: Chat
     onClick: (chatId: string) => void;
+    latestMessage: {
+      content: string;
+      createdAt: Date;
+    }
 };
 
-const ChatCard : React.FC<ChatCardProps> = ({ data , onClick}) => {
+const ChatCard : React.FC<ChatCardProps> = ({ data , onClick , latestMessage} ) => {
   const router = useRouter()
 
   //Change selected Chat Background Color
@@ -51,7 +55,7 @@ const ChatCard : React.FC<ChatCardProps> = ({ data , onClick}) => {
   };
 
   //Fetching time of last message
-  const createdAt = new Date(Number(data.messages && data?.messages[0]?.createdAt)); 
+  const createdAt = new Date(Number(latestMessage?.createdAt || data.messages && data?.messages[0]?.createdAt)); 
   const timeOfLastMessageOnChat = getTimeAgoString(createdAt);
   return (
     <>
@@ -62,19 +66,20 @@ const ChatCard : React.FC<ChatCardProps> = ({ data , onClick}) => {
       >
         <div className="flex gap-3 items-center">
           <div className="min-w-14 min-h-14 flex flex-col justify-center relative">
-            {
-              secondUserInfoOnChat && secondUserInfoOnChat?.avatar ? (
-                <Avatar
-                  className="h-12 w-12"
-                >
-                  <AvatarImage src={secondUserInfoOnChat?.avatar} />
-                </Avatar>
-              ) : (
-                <Avatar className="h-12 w-12">
-                  <AvatarFallback>{((secondUserInfoOnChat?.firstname?.[0] || '') + (secondUserInfoOnChat?.lastname?.[0] || '')).toUpperCase()}</AvatarFallback>
-                </Avatar>
-              )
-            }
+            {secondUserInfoOnChat && secondUserInfoOnChat?.avatar ? (
+              <Avatar className="h-12 w-12">
+                <AvatarImage src={secondUserInfoOnChat?.avatar} />
+              </Avatar>
+            ) : (
+              <Avatar className="h-12 w-12">
+                <AvatarFallback>
+                  {(
+                    (secondUserInfoOnChat?.firstname?.[0] || "") +
+                    (secondUserInfoOnChat?.lastname?.[0] || "")
+                  ).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            )}
 
             {secondUserInfoOnChat && secondUserInfoOnChat?.isActive && (
               <span className="absolute bottom-1 right-0 block h-2.5 w-2.5 rounded-full bg-green-600 ring-2 ring-white"></span>
@@ -112,15 +117,15 @@ const ChatCard : React.FC<ChatCardProps> = ({ data , onClick}) => {
               >
                 {senderId == true && (
                   <span className="font-semibold text-black dark:text-white">
-                    You:
+                    {" "}
+                    You:{" "}
                   </span>
-                )}{" "}
-                {data.messages &&
+                )}
+                {latestMessage?.content || data.messages &&
                   (!data.messages[0]?.content
                     ? "You sent an attachment"
                     : data.messages[0]?.content)}
               </p>
-
               <div className="h-full flex  items-center">
                 {/* Unread message Count */}
                 <span className="bg-blue-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
